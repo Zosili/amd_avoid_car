@@ -6,6 +6,9 @@
 
 **一句话**：Ryzen AI PC 跑端侧视觉推理，ZYNQ-7020 板卡跑 360° 激光雷达解析、多传感器融合决策、AXI 电机控制与监控广播；两端通过 TCP 闭环，小车在真实场地完成「看见人/障碍 → 减速 / 绕行 / 停车」的物理任务。
 
+> **接手前先读 [`AGENTS.md`](AGENTS.md)**（给队友的 AI agent 用的操作手册：目录地图、不变量、必跑验证、已知坑、任务优先级）。
+> 隐私与协作规则见 [`CONTRIBUTING.md`](CONTRIBUTING.md)。
+
 ---
 
 ## 1. 现状（截至 2026-10-31）
@@ -168,6 +171,7 @@ cd host/app/d6_tools && python d6_frame_analyze.py
 
 | 想干什么 | 去哪 |
 |---|---|
+| 队友 / AI agent 接手 | [AGENTS.md](AGENTS.md) |
 | 搞懂整体怎么搭 | [docs/architecture.md](docs/architecture.md) |
 | 改协议 / 加字段 | [docs/interface.md](docs/interface.md) + `host/app/car/protocol.py` |
 | 接线、跳线、供电 | [docs/hardware_setup.md](docs/hardware_setup.md) |

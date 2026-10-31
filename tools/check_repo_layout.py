@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """check_repo_layout.py — 提交仓库的命名与结构自检（对应指南 3.2.5 / 3.2.5.5）
 
@@ -28,6 +28,7 @@ ALLOWED_NAME = re.compile(r"^[a-z0-9._-]+$")
 UPPERCASE_WHITELIST = {
     "README.md", "MODEL.md", "CONTRIBUTING.md", "NOTICE.md", "LICENSE",
     "LICENSE.md", "CHANGELOG.md", "AUTHORS.md", "CODEOWNERS",
+    "AGENTS.md",          # agent 接手约定的标准文件名（大写是惯例）
 }
 SKIP_DIRS = {".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".venv",
              "node_modules", ".idea", ".vscode"}

@@ -10,20 +10,57 @@
 | 队友 | Write（Collaborator） | 推分支、开 PR、合并自己的 PR（建议仍走 review） |
 | 其他人 | 无 | 不公开、不加第三方 App、不装会读代码的 CI 机器人 |
 
-**加人**（所有者执行一次，队友在邮箱里点接受）：
+**加人**（所有者执行，三选一）：
 
 ```bash
-gh api -X PUT repos/<owner>/amd_avoid_car/collaborators/<teammate_username> -f permission=push
+# A. 知道对方 GitHub 用户名（推荐，一条命令）
+gh api -X PUT repos/Zosili/amd_avoid_car/collaborators/<用户名> -f permission=push
+#    只读改成 -f permission=pull；写权限给 push
+
+# B. 只想让对方看（read-only）
+gh api -X PUT repos/Zosili/amd_avoid_car/collaborators/<用户名> -f permission=pull
 ```
+
+**C. 只有邮箱 / 对方还没账号**：打开 `https://github.com/Zosili/amd_avoid_car/settings/access` →
+`Add people` → 输入邮箱 → 邀请邮件里带接受链接（对方按提示注册即可）。
+
+**接受邀请**：被邀请人登录后打开 `https://github.com/Zosili/amd_avoid_car/invitations` 点接受。
+（GitHub 的协作者邀请会过期，过期就重发；这个页面任何时候都能看有没有待接受的邀请。）
+
+> ⚠️ **GitHub 没有「私有库公开邀请链接」**：私有仓库只能按「用户名 / 邮箱」点名加人，不存在谁点谁能进的链接
+> （[GitHub 文档](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-access-to-your-personal-repositories/inviting-collaborators-to-a-personal-repository)、
+> [Stack Overflow](https://stackoverflow.com/questions/31264165/can-i-share-my-private-github-repository-by-link)、
+> [社区讨论](https://github.com/orgs/community/discussions/171917)）。
+> 需要「一个链接给一群人」只能靠组织/团队（Organization + Team），或个人库逐个点名。
 
 队友本地首次拉取（任选其一）：
 
 ```bash
-git clone https://github.com/<owner>/amd_avoid_car.git      # 会弹浏览器授权
-git clone git@github.com:<owner>/amd_avoid_car.git          # 已配 SSH key 的话
+git clone https://github.com/Zosili/amd_avoid_car.git      # 会弹浏览器授权
+git clone git@github.com:Zosili/amd_avoid_car.git          # 已配 SSH key 的话
 ```
 
-> 若组织/账号开了 2FA，HTTPS 推送要用 **Personal Access Token**（scope 只需 `repo`），别把 token 写进 remote URL 或任何文件。
+> 若账号开了 2FA，HTTPS 推送要用 **Personal Access Token**（scope 只需 `repo`，推 CI 文件才需要 `workflow`），别把 token 写进 remote URL 或任何文件。
+> 本机（所有者）已在这个仓库设了 `http.proxy=http://127.0.0.1:7892`：直连 github.com 会超时，`api.github.com` 直连可用。
+
+### 私有性自查（三分钟，任一条不符就说明配置被改过）
+
+```bash
+# ① 有权限的人看：必须 true / private
+gh api repos/Zosili/amd_avoid_car --jq '{private, visibility}'
+
+# ② 匿名看网页：私密仓库返回 404（不是 200/302）
+curl -s -o /dev/null -w '%{http_code}\n' https://github.com/Zosili/amd_avoid_car
+
+# ③ 匿名读仓库：必须被要求认证（fatal: could not read Username）
+git -c credential.helper= ls-remote https://github.com/Zosili/amd_avoid_car.git
+```
+
+另外确认这几项没被打开：`Settings → General → Danger Zone`（不要 `Change visibility`）、
+`Settings → Pages`（私有库默认无站点）、`Settings → Access → 没有多余协作者`、无 Deploy key、无 GitHub App。
+
+> 注：`api.github.com` 对**未认证**请求有共享 IP 的限流（403 rate limit exceeded），
+> 443 的 404/认证失败才是判断私有性的可靠信号。
 
 ## 2. 分支与提交流程
 
