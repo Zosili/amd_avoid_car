@@ -1,0 +1,12 @@
+{"t": 1792844580779, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 1, "timestamp": 1792844580779, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792844580880, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 2, "timestamp": 1792844580880, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792844580980, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 3, "timestamp": 1792844580980, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792844581081, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 4, "timestamp": 1792844581081, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792844581182, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 5, "timestamp": 1792844581182, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792844581282, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 6, "timestamp": 1792844581282, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792844581383, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 7, "timestamp": 1792844581383, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792844581483, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 8, "timestamp": 1792844581483, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792844581583, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 9, "timestamp": 1792844581583, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792844581684, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 10, "timestamp": 1792844581684, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792844581784, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 11, "timestamp": 1792844581784, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792844581885, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 12, "timestamp": 1792844581885, "action": "STOP", "speed": 0, "steering": 90}}

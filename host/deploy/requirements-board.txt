@@ -1,0 +1,9 @@
+# 板端（PYNQ 2.7.0 / Ubuntu 18.04 / Python 3.6.9）依赖
+# 用法：sudo pip3 install -r requirements-board.txt
+# 注意：板上 Python 3.6，numpy 不能升到 1.20+（会掉 3.6 支持）
+pynq>=2.7              # PYNQ 框架（overlay / MMIO）；系统镜像已自带
+pyserial>=3.4          # 雷达 /dev/ttyUSB0
+numpy==1.19.5          # 最后一个支持 Python 3.6 的版本
+
+# 板端不装 matplotlib：ARM 上一帧 1–2 s，会把 10 Hz 决策拖垮
+# （监控图在 PC 上画：host/app/integration/radar_map_view.py --tcp <board_ip>:5002）

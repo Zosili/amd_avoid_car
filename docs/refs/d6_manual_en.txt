@@ -1,0 +1,168 @@
+Product Manual
+Product Specification:
+Model: Gouke Optronics COIN-D6
+Description: LiDAR
+1.Product Overview
+The COIN-D6 is a new-generation coaxial 360° scanning ranging LiDAR developed by Gouke Optronics. Based on the direct Time-of-Flight (dToF) ranging principle, the product utilizes wireless power transfer and optical communication technology for its internal rotating components. Combined with optical, electrical, and algorithm design, it achieves high-frequency, high-precision distance measurement with a maximum measurement radius of 12m. This product is suitable for practical application scenarios such as map surveying, intelligent device navigation &amp; obstacle avoidance, and environmental modeling.
+Product Features:
+Maximum Measurement Range: 0.05m ~ 12m.
+Utilizes direct Time-of-Flight (dToF) ranging principle.
+Scanning Range: 360°, Angular Resolution: 0.9°.
+Coaxial design, compact size, suitable for built-in installation.
+Uses brushless motor with a long service life exceeding 10,000 hours.
+2. Specifications
+2.1 Performance Parameters
+Item
+Min Value
+Typical Value
+Max Value
+Unit
+Remarks
+Laser Wavelength
+890
+905
+920
+nm
+-
+Laser Safety
+-
+Class 1
+-
+-
+(IEC-60825)
+Range (90% Reflect.)
+0.05
+10
+12
+m
+90% Diffuse Reflectivity
+Range (10% Reflect.)
+0.05
+8
+10
+m
+10% Diffuse Reflectivity
+Accuracy① (0.05-1m)
+±10
+-
+-
+mm
+0.05-1m
+Accuracy① (&gt;1m)
+±30
+±40
+-
+mm
+&gt;1m
+Field of View (FoV)
+-
+-
+360
+°
+-
+Elevation Angle
+0
+-
+2
+°
+-
+Angular Resolution
+-
+0.9
+-
+°
+-
+Point Frequency
+-
+4000
+-
+Hz
+-
+Ambient Light Resistance
+-
+-
+60k
+lx
+According to Guoke Optronics test method
+Rotation Speed
+-
+10
+15
+Hz
+-
+Rated Power
+-
+1.2
+1.6
+W
+-
+Operating Temp.
+-10
+25
+50
+°C
+-
+Storage Temp.
+-30
+25
+70
+°C
+-
+Service Life
+-
+10000
+-
+H
+-
+Note ①: Measurement accuracy may be affected by temperature variations. Please refer to detailed test data for specific performance under different conditions.
+2.2 Mechanical Parameters
+Item
+Parameter
+Waterproof Rating
+IPX4
+Weight
+40g (excluding external cables)
+Dimensions (LWH)
+52.7mm * 45.2mm * 34.4mm
+2.3 Optical Window
+To prevent dust from affecting the LiDAR’s ranging performance, please keep the product’s optical window clean.
+To ensure normal operation of the LiDAR, external system designs must avoid obstructing the LiDAR’s optical window. If there are special installation requirements or a need to encapsulate the LiDAR with light-transmitting materials, please contact Gouke Optronics technical personnel to verify feasibility.
+Taking the sensor base plane as the reference, the laser emission point height of the COIN-D6 from the base plane is 26.9mm.
+2.4 Installation and Outline Dimensions
+2.5 Scan Data Coordinate System Definition
+The COIN-D6 adopts a coordinate system following the left-hand rule. The origin of the coordinate system is the rotation center of the ranging core, and the rotation angle increases with clockwise rotation. The coordinate system definition is shown in the figure below:
+3.Hardware Connection
+Wire Color Coding:
+• Yellow: Connect to 5V
+• White: Connect to GND
+• Red: Connect to TXD
+• Black: Connect to RXD
+4. User Guide
+4.1 Windows System
+4.1.1 Driver Installation
+Double-click the SETUP.EXE program to begin driver installation.
+Click “Install” to start the driver installation.
+Install the USB serial port driver (can be skipped if already installed). After installing the driver, plug the USB into the computer. If it displays “USB-SERIAL CH340 (COMX)”, it indicates successful driver installation, as shown.
+4.1.2 Using the Host Computer Software
+Open the CSPC host software compressed package, then launch the host software. Confirm that the serial port matches the one previously displayed, then click the “OPEN” button. Click the radar icon to open the host software interface.
+Click the “Running” button on the host software to start the radar operation and display the point cloud.
+Click on a point in the point cloud with the mouse to display the angle, distance, and intensity information of the selected point, as shown below.
+4.2 ROS2
+Import the SDK into a virtual machine with a configured ROS2 environment, placing it under ros2_ws/src/.
+Modify cspc_lidar_sdk_ros2/params/cspc_lidar.yaml and change the port to the actual serial port.
+Check serial port permissions and grant access if necessary.
+Compile within the entire ros2_ws workspace by entering the command colcon build in the terminal.
+After compilation, enter the command source install/setup.bash in the terminal to add environment variables.
+Enter the command ros2 launch cspc_lidar lidar_launch.py in the terminal to start the LiDAR and begin receiving data.
+Enter the command ros2 launch cspc_lidar lidar_rviz.py in the terminal to open RViz2.
+You can then observe the point cloud visualization.
+5. FAQ
+(Content for this section is typically added based on common user inquiries.)
+6.Contact Us
+WitMotion Shenzhen Co., Ltd
+Website: http://www.wit-motion.com/
+Phone: +86-755-33185882
+Email: wit@wit-motion.com
+Chinese Website: http://www.wit-motion.cn
+Store: https://robotcontrol.taobao.com
+Address: Guangming Yunli Intelligent Park, No. 143 Xihuan Avenue, Guangming District, Shenzhen City, Guangdong Province, China.

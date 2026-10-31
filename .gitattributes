@@ -1,0 +1,20 @@
+# 默认统一 LF，Windows 脚本保持 CRLF
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.sh  text eol=lf
+
+# 二进制：Git 不要尝试 diff/合并
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.bin binary
+*.rpt -text
+*.pb  -text
+
+# FPGA 大件走 Git LFS（首次使用需 `git lfs install`）
+*.bit  filter=lfs diff=lfs merge=lfs -text
+*.xsa  filter=lfs diff=lfs merge=lfs -text
+*.hwh  filter=lfs diff=lfs merge=lfs -text
+*.dcp  filter=lfs diff=lfs merge=lfs -text

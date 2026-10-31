@@ -1,0 +1,8 @@
+{"t": 1792489181993, "rule": "R5", "why": "no radar frame ever", "control": {"version": 1, "seq": 1, "timestamp": 1792489181993, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792489182094, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 2, "timestamp": 1792489182094, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792489182194, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 3, "timestamp": 1792489182194, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792489182295, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 4, "timestamp": 1792489182295, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792489182396, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 5, "timestamp": 1792489182396, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792489182497, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 6, "timestamp": 1792489182497, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792489182597, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 7, "timestamp": 1792489182597, "action": "STOP", "speed": 0, "steering": 90}}
+{"t": 1792489182698, "rule": "R5", "why": "no vision frame ever", "control": {"version": 1, "seq": 8, "timestamp": 1792489182698, "action": "STOP", "speed": 0, "steering": 90}}

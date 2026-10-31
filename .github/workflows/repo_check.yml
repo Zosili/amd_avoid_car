@@ -1,0 +1,47 @@
+name: repo-check
+
+# 3.2.5 的命名硬要求 + 决策/雷达单测 + 指标可复算，每次 push 都跑一遍
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  layout:
+    name: 命名与结构自检
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: check_repo_layout
+        run: python tools/check_repo_layout.py
+
+  tests:
+    name: 决策 + 雷达单测
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: 依赖
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r host/deploy/requirements-host.txt pytest
+      - name: pytest
+        working-directory: host/app
+        run: python -m pytest car -q
+
+  metrics:
+    name: 指标可复算
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: latency_stats
+        run: python metrics/scripts/latency_stats.py
