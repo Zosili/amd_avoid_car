@@ -39,7 +39,8 @@
 | 包名 `zheng` → `car`（含 `sys.path` 拼接、变量 `ZHENG`→`CAR`、注释） | `car/**`、`joint/board_main.py`、`integration/*.py`、`radar_console/*.py` | `python -m pytest car -q` → **32 passed** |
 | `D:\dasanshang\...` 绝对路径 → 相对脚本位置 | `d6_tools/*`（抓包路径）、`radar_map_view.py`、`radar_decision_view.py`、`radar_console.py`、`radar_helper.py`、`_smoke_*.py`、`_gen_bat.py` | 编译 + 实跑 `d6_frame_analyze.py`、`contract.py` |
 | 启动脚本 `.sh` 去掉硬编码解释器与根目录 | `joint/_run_*.sh` | 逻辑未改，路径改为 `BASH_SOURCE` 推导 |
-| `.bat` 重写为 ASCII + `%~dp0` | `radar_console*.bat` | 本次未在 Windows 双击实测（待验证） |
+| `.bat` 重写为 ASCII + `%~dp0`；删除 `_gen_bat.py`（生成机器专用 bat 的脚本，已被可移植 bat 取代） | `radar_console*.bat`、`host/app/radar_console/` | `.bat` 本次未在 Windows 双击实测（待验证） |
+| `radar_console.py` 生成快捷方式时用当前解释器推 `pythonw.exe`（原来是硬编码个人 Python312 路径） | `host/app/radar_console/radar_console.py` | `py_compile` 通过 |
 | `write_sd.ps1` 镜像路径改为参数 `-Image` | `host/deploy/write_sd.ps1` | 语法未跑（需管理员+SD 卡） |
 | 空目录补齐 `README.md`（每个目录都有说明） | `fpga/*`、`host/*`、`metrics/*`、`skill/`、`report/` | — |
 

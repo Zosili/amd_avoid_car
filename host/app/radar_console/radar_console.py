@@ -571,7 +571,9 @@ class RadarConsole:
     # ------------------------------------------------------------ 快捷方式
     def make_shortcut(self):
         lnk = os.path.join(DESKTOP_DIR, "雷达控制台.lnk")
-        sys_pyw = r"C:\Users\ASUS\AppData\Local\Programs\Python\Python312\pythonw.exe"
+        # 用当前解释器推 pythonw（Windows 下同目录有 pythonw.exe；没有就用自身）
+        _pw = os.path.join(os.path.dirname(sys.executable), "pythonw.exe")
+        sys_pyw = _pw if os.path.exists(_pw) else sys.executable
         vbs = os.path.join(HERE, "_mklnk.vbs")
         body = (
             'Set s = CreateObject("WScript.Shell")\r\n'
