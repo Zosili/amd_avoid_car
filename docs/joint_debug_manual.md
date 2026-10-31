@@ -1,3 +1,7 @@
+﻿> **仓库内位置提醒**：本手册原写在旧工作区（`D:\dasanshang\fpga竞赛\joint\`），文中命令与路径按旧布局书写。
+> 在本仓库里对应：`host/app/joint/`（板上入口与 mock）、`host/app/integration/`（契约 contract.py 与云图）、`host/app/car/`（决策包，原名 `zheng/`）。
+> 端口、字段、时序以 [`interface.md`](interface.md) 为准；跑之前先看仓库根 `README.md`。
+
 # 三端联调手册（雷达/融合 · 视觉 · 电机）
 
 > 面向：郑（雷达+融合决策）、欧阳（视觉）、徐（FPGA/电机）
