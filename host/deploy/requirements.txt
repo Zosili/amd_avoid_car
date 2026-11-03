@@ -1,0 +1,19 @@
+# PC 端依赖（Windows）
+# 安装： pip install -r requirements.txt
+#
+# 说明：
+#  - onnxruntime-directml 才是能吃到 AMD 核显的那个包；
+#    普通 onnxruntime 只能跑 CPU，单帧会慢一个量级。
+#  - DirectML 不指定 device_id 时默认选"高性能"显卡，
+#    在双显卡机器上会跑到独显上去，脚本里已显式 device_id=0。
+#  - numpy 2.x 与 opencv 4.10 搭配正常；若遇到 ABI 报错，先统一升级两者。
+
+onnxruntime-directml>=1.20
+numpy>=1.26
+opencv-python>=4.9
+
+# COIN-D6 雷达桥需要（host/radar/d6_protocol.py 顶层 import serial）
+pyserial>=3.5
+
+# 可选：只有跑雷达点云视图 radar_view.py 才需要
+# matplotlib>=3.7

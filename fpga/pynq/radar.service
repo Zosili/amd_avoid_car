@@ -1,0 +1,13 @@
+[Unit]
+Description=Radar fusion bridge (COIN-D6 -> AXI UART Lite -> AXI GPIO -> PL)
+After=multi-user.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/home/xilinx/radar/start_radar.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

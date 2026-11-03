@@ -1,0 +1,7 @@
+# skill 包依赖
+# 只用标准库的：hwh_probe / check_timing / latency_stats 无需安装
+pyserial>=3.5          # radar_probe
+numpy>=1.21            # bench_infer / latency_stats
+onnxruntime>=1.16      # bench_infer（Windows+AMD GPU 换成 onnxruntime-directml）
+# onnxruntime-directml  # 可选：Radeon / Ryzen AI 核显走 DirectML
+# onnxruntime-rocm      # 可选：Linux + ROCm

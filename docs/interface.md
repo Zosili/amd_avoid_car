@@ -1,204 +1,171 @@
-# 接口定义（协议 / 报文 / 寄存器 / 时序）
+# 接口定义
 
-> 对应指南 3.2.5.1(1)「接口定义：通信协议、报文格式或寄存器映射、数据类型与时序约定」。
-> **改本文件里任何一条规则，必须同时升 `CONTRACT_VERSION`，并让两人都 review 过。**
+## 1 网络
 
-真源（唯一权威实现，文档与代码冲突时以代码为准）：
-
-| 内容 | 文件 |
+| 项 | 值 |
 |---|---|
-| 消息 schema、阈值 `CFG`、动作集合 | [`host/app/car/protocol.py`](../host/app/car/protocol.py) |
-| steering → 差速 PWM、检测框 → Vision JSON、频率契约 | [`host/app/integration/contract.py`](../host/app/integration/contract.py)（`CONTRACT_VERSION = 2`） |
-| D6 雷达串口帧 | [`host/app/car/radar/d6_protocol.py`](../host/app/car/radar/d6_protocol.py) |
-| AXI 电机寄存器 | [`fpga/src/motor/motor_axi.v`](../fpga/src/motor/motor_axi.v) |
-| 板端编排（端口、广播内容） | [`host/app/joint/board_main.py`](../host/app/joint/board_main.py) |
+| 板子 IP / MAC | `192.168.1.10` / `00-11-22-33-44-55` |
+| PC IP | `192.168.1.102`（与板子同网段，无需网关） |
+| 图传 | 板 → PC，UDP **1234** |
+| 距离帧 | PC → 板，UDP **5000** |
+| 雷达扫描（预留） | 进程间 UDP **15001**（本机 5001 被 NI 服务占用） |
 
----
+> 工程只实现 ARP + UDP，**不响应 ICMP**，所以 `ping 192.168.1.10` 不通是正常的。判断板子活着用 ARP：`arp -a | findstr 192.168.1.10`。
 
-## 1. 端口与传输总表
+## 2 图传帧格式（板 → PC）
 
-| 端口 | 传输 | 谁监听 | 谁连 | 方向 | 内容 | 频率 |
-|---|---|---|---|---|---|---|
-| **5000** | **TCP**，行分隔 JSON | 板子（`joint/vision_server.py`） | 视觉 PC | PC → 板 | Vision JSON | **≥ 7 Hz（硬要求）** |
-| **5001** | TCP，行分隔 JSON | 电机侧（徐） | 板子（`comm/tcp_client.py`，断线 1 Hz 重连） | 双向 | Control JSON ↓ / Status JSON ↑ | 10 Hz |
-| **5002** | TCP，行分隔 JSON | 板子（`MonitorBroadcaster`） | 任一 PC 监控端 | 板 → PC | Monitor JSON（只读） | ~10 Hz |
-| 1234 | UDP，自定义帧 | PC（`main_ryzenai.py`） | PL（`eth_top`/`udp`） | 板 → PC | 相机帧：`f0 5a a5 0f` + `02 80 01 e0`(640×480) + 614 400 B RGB565（小端） | ~26 fps |
-| — | UART 230400 8N1 | 板子 PS | D6 雷达 | 雷达 → 板 | 85 B 定长帧（§5） | 163 帧/s |
-| — | AXI4-Lite（PS→PL） | PL `motor_axi` | PS（`pynq.MMIO`） | 双向 | 寄存器读写（§6） | 10 Hz + 100 ms 心跳 |
-
-> ⚠️ **5000 端口有两套互不兼容的历史实现**：本表规定的是 **TCP**（`joint/vision_server.py`，当前方案）；`integration/vision_receiver.py` / `vision_sender.py` 是早期的 **UDP** 方案（文档字符串里还写着「PS IP 192.168.1.20」）。两者不能同时起，接板联调时**只用 TCP 那套**，UDP 那套保留仅作历史参考（建议改端口 5010 以免误连）。
-
----
-
-## 2. 通用约定
-
-| 项 | 约定 |
-|---|---|
-| 编码 | UTF-8 JSON，**每行一条**（`\n` 结尾），不做批量数组 |
-| 版本字段 | 所有消息带 `"version": 1`；版本不符直接丢弃 |
-| 时间 | Unix 毫秒整数（`int(time.time()*1000)`）；**接收方重打到达时间**，不信任发送方时间戳 |
-| 距离 | 米（float）；**无有效回波用 `null`，绝不用 `0`**（0 会被当成"贴脸"） |
-| 角度 | 雷达角度：度，顺时针为正，0° 见 §5；舵机角度 0–180，90 = 中位 |
-| 速度 | `speed` 0–100（百分比）；PWM 满量程 1000（`contract.PWM_MAX`） |
-| 数值校验 | 视觉归一化字段必须是 `0.0 ~ 1.0`（含端点）的 `int/float`；`bool` 不算数值 |
-| 未知字段 | 忽略（向前兼容）；缺必需字段 → 整条丢弃并计入 `drops` |
-
----
-
-## 3. Vision JSON（PC → 板，5000/TCP）
-
-```json
-{"version":1,"timestamp":1793423322338,"obstacle":true,
- "nearest":{"class":"person","confidence":0.82,
-            "cx":0.30,"cy":0.55,"width":0.18,"height":0.42}}
-```
-
-| 字段 | 类型 | 约束 | 说明 |
+| 偏移 | 长度 | 内容 | 说明 |
 |---|---|---|---|
-| `version` | int | == 1 | 版本不符丢弃 |
-| `timestamp` | int | 毫秒 | PC 侧产生时刻；板子**会覆盖**为到达时间 |
-| `obstacle` | bool | 必需 | `false` 时可不给 `nearest`（但**必须照发**，不发等于链路断 → 车停） |
-| `nearest.class` | str | 必需 | 类别名，如 `person` |
-| `nearest.confidence` | float | 0–1 | 置信度 |
-| `nearest.cx` / `cy` | float | 0–1 | 框中心**归一化**坐标（不是像素！`cx = (x1+x2)/2/W`） |
-| `nearest.width` / `height` | float | 0–1 | 框宽高归一化 |
+| 0 | 4 | `F0 5A A5 0F` | 帧头，接收端重同步用 |
+| 4 | 2 | 宽（大端） | `02 80` = 640 |
+| 6 | 2 | 高（大端） | `01 E0` = 480 |
+| 8 | 614400 | RGB565 像素 | 行优先，每像素 2 字节 |
 
-**`nearest` 选取规则**：取 `cy` 最大的框（画面最靠下 = 离车最近），不用「置信度最高」。
-**左右判定**（`protocol.vision_side`）：`cx < 0.45` → `left`；`cx > 0.55` → `right`；其余 `center`。
+整帧 **614408 B**，按 1288 B 一片发送。
 
-**频率契约（最容易踩的坑）**
+**像素格式判据**：正常帧长必须是 614408。若抓到 307200（= 640×480×1），说明 OV5640 掉回了 8 位 YUV 模式，按 RGB565 解码会满屏彩虹噪点——用 `metrics/scripts/probe_frame_size.py` 一条命令即可判定。
 
-```
-vision_timeout_ms >= 2 × (1000 / 发送频率Hz)
-   2 Hz → 1000 ms      5 Hz → 400 ms      10 Hz → 200 ms
-```
-当前 `vision_timeout_ms = 300` ⇒ 要求发送频率 **≥ 6.7 Hz**，取整 **7 Hz**（`contract.VISION_HZ_MIN = 7.0`）。
-❌ 不要用「2 Hz 推理 + 10 Hz 重发旧结果」凑频率：时间戳骗人，人走了车还在躲。
+## 3 距离帧格式（PC → 板）
 
-参考实现：[`host/app/integration/vision_sender.py`](../host/app/integration/vision_sender.py)（`detections_to_vision()` 负责像素 → 归一化）。
+| 偏移 | 长度 | 内容 | 说明 |
+|---|---|---|---|
+| 0 | 2 | `AA 55` | 帧头 |
+| 2 | 2 | 距离（大端） | 单位 mm；`0xFFFF`=无人，`0xFFFE`=有人但测不出距离 |
+| 4 | 1 | 转向 | `0x00`=直行 `0x01`=左转 `0x02`=右转 `0x03`=开环测试 |
 
----
+- **5 字节，20 Hz**；
+- PL 侧**不做端口过滤**，只校验目的 MAC / 目的 IP / 协议类型（`0800` / UDP），因此换端口不影响；
+- 语义是"最新状态"而非事件流：覆盖式，丢一帧无影响，也不需要序号或时间戳。
 
-## 4. Control / Status JSON（板 ↔ 电机，5001/TCP）
+**距离字段的三种取值（2026-11-03 新增 `0xFFFE`）：**
 
-### 4.1 Control（板 → 电机侧）
-
-```json
-{"version":1,"seq":123,"timestamp":1793423322338,
- "action":"RIGHT","speed":35,"steering":45,
- "pwm_l":350,"pwm_r":140,"in1":1,"in2":0,"in3":1,"in4":0}
-```
-
-| 字段 | 类型 | 说明 |
+| 值 | 含义 | PL 行为 |
 |---|---|---|
-| `seq` | int | 0–65535 循环；Status 必须原样回显，用于丢包排查 |
-| `action` | str | `FORWARD` / `SLOW` / `LEFT` / `RIGHT` / `STOP` |
-| `speed` | int | 0–100 |
-| `steering` | int | 0–180，90 = 直行（`>90` 左、`<90` 右）；**电机侧不需要理解它** |
-| `pwm_l` / `pwm_r` | int | **已算好的差速量**，带符号：`>0` 正转、`<0` 反转、`0` 惰行；量程 ±`PWM_MAX`(1000) |
-| `in1..in4` | 0/1 | 同上信息的电平形式：左轮 `in1/in2`、右轮 `in3/in4`；`pwm>0 → (1,0)`，`pwm<0 → (0,1)`，`pwm=0 → (0,0)` |
+| `0xFFFF` | 无人 | CLEAR，静音前进 |
+| `0xFFFE` | 有人但测不出距离 | 按 2000mm（WARN）处理：**鸣叫、不停车** |
+| 其他 | 距离 mm | 按 1m / 3m 阈值决策 |
 
-**差速映射（唯一实现：`contract.control_to_diff`）**
+> 加 `0xFFFE` 的原因：原来"有人测不出距离"和"无人"都发 `0xFFFF`，PL 会当没人放行，
+> 于是出现"PC 显示 STOP、轮子还在转""人一消失车立刻动"这两类现象。
+
+## 4 板端引脚
+
+| 信号 | 引脚 | 说明 |
+|---|---|---|
+| `sys_clk` | U18 | 50 MHz 晶振 |
+| `sys_rst_n` | N16 | 按键复位，低有效 |
+| `pwm_l` / `in1` / `in2` | U7 / T9 / Y7 | L298N 左路（ENA/IN1/IN2） |
+| `pwm_r` / `in3` / `in4` | V8 / V6 / Y9 | L298N 右路（ENB/IN3/IN4） |
+| `beep` | M14 | 有源蜂鸣器，高电平响 |
+| `eth_rxc/rx_ctl/rxd[3:0]` | — | RGMII 接收（PHY 在 PL 侧） |
+| `eth_txc/tx_ctl/txd[3:0]` | — | RGMII 发送 |
+| `cam_*` | — | OV5640 DVP + SCCB |
+
+完整约束见 `fpga/src/constraints/7020_top.xdc`。
+
+## 5 雷达接入（COIN-D6）
+
+### 5.1 关键事实：D6 不是 LD06
+
+`host/app/fusion/lidar_ld06.py` 按 LD06 协议解包（`0x54 | 0x2C | ...` 47 字节）。
+实测 COIN-D6 是 **85 字节 `AA 55` 帧 + 双字节异或校验**，包头都不同。
+所以 **`--lidar serial` 对 D6 永远锁不上包**，不要用那条路。
+
+### 5.2 走法：雷达桥 → UDP 15001
 
 ```
-base = clamp(speed/100 × PWM_MAX, 0, PWM_MAX)
-k    = clamp((steering - 90) / 45, -1, +1)        # k>0 左转，k<0 右转
-k>=0: pwm_r = base, pwm_l = base × (1 - TURN_GAIN×k)   # 外侧轮不超速，内侧最多停转
-k<0 : pwm_l = base, pwm_r = base × (1 + TURN_GAIN×k)
-|pwm| < DEADBAND_PWM(20) → 0                       # 防电机嗡嗡响不转
-action == "STOP" → 四个 pwm/in 全 0（惰行）
+D6 ──USB(CH340, 230400 8N1)──> host/radar/d6_stream.py
+                                  │ 0.5° 分箱、按圈切分
+                                  └──UDP 15001 JSON──> detect_fusion_live.py --lidar udp
 ```
-参数：`PWM_MAX=1000`、`TURN_GAIN=0.6`、`DEADBAND_PWM=20`。**标定只改这三个数**，别在电机侧另写一套。
 
-### 4.2 Status（电机侧 → 板）
+```bash
+# 窗口 A
+host\radar\run_radar_bridge.bat
+# 窗口 B
+set LIDAR=udp& set SIGN=-1& host\deploy\run_fusion.bat
+```
+
+**契约**（与 `fusion_core.Scan` 字段一致，不要改）：
 
 ```json
-{"version":1,"seq":123,"timestamp":1793423322410,"ok":1,"vbat":12.1,"enc_l":0,"enc_r":0}
+{"angles":[0.0,0.5,...,359.5], "ranges":[1.234, null, ...]}
+```
+720 点、米、无回波 `null`、约 9.2 Hz（M35/M36）。
+
+### 5.3 角度约定（最容易错的地方）
+
+桥的输出恒为「0° = 车头，**逆时针为正**」。本侧映射是：
+
+```
+theta = theta0 + ang_sign * alpha        alpha = atan((u - cx) / fx)
 ```
 
-| 字段 | 说明 |
+人站在画面**右侧**时 `alpha > 0`，而在逆时针为正的坐标系里右侧对应 `360° - alpha`，
+因此 **`ang_sign` 恒取 `-1`**，与雷达正装/倒装无关——倒装由桥的 `--mount inverted`
+在内部把原始角镜像回来，输出仍然保持"逆时针为正"。
+
+> ⚠ **文档冲突提醒**：雷达桥的《代码说明》§5 表格写"倒装 → 队友 `ang_sign=+1`"，
+> 但它自己的代码（`a = (theta0 + sign*ang) % 360`）和 §10 的实测记录（倒装时
+> `source` 全 = lidar，用的是本侧默认 `ang_sign=-1`）都指向"恒 -1"。
+> **以代码为准，`ang_sign` 保持 -1**；现场用下面的一次性检查确认。
+
+**一次确认（2 分钟）**：人站车头正前方 1 m，看画面 HUD 那行
+`p0 alpha=... -> theta=... radar=... [lidar]`。
+把纸箱挪到车头**右侧** 1 m，`theta` 应该落在 **270°~360°** 区间。
+若落在 0°~90°，说明方向反了，改成 `+1` 再验一次。
+
+### 5.4 `theta0` 只在一边补
+
+桥里有 `theta0`，本侧也有 `--theta0`。**只能在其中一处补偿**，两处都加等于加两遍。
+约定：`theta0` 统一在桥的 `d6_config.json` 里补，本侧 `--theta0` 保持 `0.0`。
+
+### 5.5 车体遮挡掩膜
+
+雷达装在车底/车体后方时，后半圈会被自身结构挡住。桥支持 `--mask 137:223`
+（支持跨 0、可逗号分隔多段）。`run_radar_bridge.bat` 默认**不带**掩膜
+（新版 `d6_config.json` 里 `mask` 为空），要屏蔽时设环境变量 `RADAR_MASK=137:223`。
+
+### 5.6 距离帧（`--dist-udp`）默认关闭，别乱开
+
+桥可以直接往板子发 4 字节距离帧（20 Hz，M37），但**语义是"最近障碍"而不是"最近的人"**：
+空房间里它会因为墙而让车停下。所以默认关闭。
+
+另外它和融合脚本的 `--cmd-udp` **只能二选一**——同一个 5000 端口两个发送方，
+板子会收到打架的距离。
+
+### 5.7 端口
+
+新版 `d6_config.json` 里 `port` 默认 `"auto"`，桥会按 CH340 的 VID/PID（`1A86:7523`）
+自动选中串口，**每台机器都能跑**，不再写死 COM5。要手动指定时用
+`run_radar_bridge.bat` 的 `RADAR_PORT` 环境变量（如 `COM11`），或改 `d6_config.json`。
+
+---
+
+### 5.8 可移植版（2026-10-31 队友更新）
+
+新版（`host/radar/`）相比初版的变化：
+
+- 串口 `port: "auto"` 自动找 CH340；路径全用 `os.path.dirname(__file__)`；无绝对路径。
+- `d6_protocol.py` 的 `import serial` 改成**延迟导入**（只做解析时不需要 pyserial）。
+- 新增 `radar_view.py`（点云图，`--save x.png` 无窗口出图，`--demo` 无雷达也能看界面）。
+- `--port` 默认 `auto`；`--mount`/`--mask`/`--sign`/`--theta0` 参数与旧启动器兼容。
+- 注意：新版 `run.bat` 仍是 UTF-8 + 中文菜单，在部分 cmd 环境下会报
+  `不是内部或外部命令`。本工程用 `run_radar_bridge.bat`（纯 ASCII + CRLF）代替，不改队友源码。
+
+---
+
+## 6 预留：雷达若改到 PS（Linux）的 AXI 邮箱
+
+如果以后雷达挪到 PS 侧跑（受限于网口在 PL，PS 没有网络，只能走片内 AXI），
+可以用 block design 里已有的 `axi_gpio_0 @ 0x41200000` 做单向邮箱，无需新增 IP：
+
+| 位域 | 含义 |
 |---|---|
-| `seq` | 原样回显对应 Control 的 `seq` |
-| `ok` | 1 = 执行成功 |
-| `vbat` | 电池电压（V，没有采样就填固定值也要给字段） |
-| `enc_l` / `enc_r` | 编码器计数；没接编码器时恒 0 |
+| `[15:0]` | 雷达最近障碍距离 mm（`0xFFFF` = 无） |
+| `[23:16]` | 心跳计数，PS 每次刷新 +1（PL 用它判断数据新鲜度） |
 
-**看门狗约定**：板子超过 **500 ms** 收不到 Status → 判链路断 → **强制 STOP**（安全设计，不是 bug）。板子退出时也会主动补发一条 STOP。
+`motor_decision` 需要增加第二路输入与看门狗，融合规则：两路都有效取 min；只有一路有效用那一路；都超时 → SAFE。
 
----
-
-## 5. D6 激光雷达串口帧（雷达 → 板）
-
-来源三源交叉验证：官方《COIN-D6 数据格式标准说明 V1.0》+ 官方 STM32 例程 `ax_laser.c` + 官方 ROS2 SDK `lidar_data_processing.cpp`；实测抓包 1110 帧，官方 CS 校验命中 **1109/1110**（唯一失败帧为 UART 误码）。样本见 [`docs/refs/d6_official_frames.txt`](refs/d6_official_frames.txt)。
-
-```
-帧长 85 B = AA 55 | M&T(1B) | LSN(1B) | FSA(2B) | LSA(2B) | CS(2B) | LSN × (Si_L, Si_2nd, Si_H)(3B)
-```
-
-| 字段 | 含义 |
-|---|---|
-| `AA 55` | 包头（参与校验，`PH = 0x55AA`） |
-| `M&T` | bit0 = 包类型（0 点云包 / 1 起始包，起始包 `LSN=1`）；bit7: 1 = 扫描频率 |
-| `LSN` | 本包采样点数（点云包 25） |
-| `FSA` / `LSA` | 起止角度原始值，小端 u16，**最低位是固定为 1 的 C 校验位** |
-| `CS` | 双字节异或校验，小端存放 |
-
-**解包公式**
-
-```
-角度 Angle(deg) = (raw >> 1) / 64.0
-距离 dist_mm    = Si_H*64 + (Si_2nd >> 2)              # 14 bit
-强度 it         = (Si_2nd & 0x03)*64 + (Si_L >> 2)      # 8 bit
-Si_L bit0       = 远距/弱回波标志（低置信，默认丢）
-CS = 0x55AA ^ (M&T + LSN*256) ^ FSA_raw ^ LSA_raw ^ XOR_k( Si_L ^ (Si_2nd + Si_H*256) )
-```
-
-**物理与几何**：波特率 230400 8N1；上电即吐流（部分固件需先发 `AA 55 F0 0F` 启动）；400 点/圈、0.9° 分辨率；量程 0.05–12 m（<6 cm 一律返回 0 = 无回波）。
-**0° 零点**：官方定义 0° 指向外壳上**单个安装耳**的方向（不是接线束方向），装车偏角用 `ZERO_OFFSET_DEG` 补偿。
-
-**扇区**（顺时针，度）：`FRONT (345,15)` 跨 0°、`LEFT (30,90)`、`RIGHT (270,330)`；每扇区取**第 k 小**（`SECTOR_ROBUST_K=2`）而非 `min()`，避免单点噪声把 3 m 拉到 0.2 m；有效点 < 4 时退回取最小。
-
----
-
-## 6. AXI4-Lite 电机寄存器（PS ↔ PL）
-
-实现：[`fpga/src/motor/motor_axi.v`](../fpga/src/motor/motor_axi.v)（参数 `CLK_HZ=50 MHz`、`PWM_HZ=20 kHz`、`WDT_MS=300`）。PS 侧：`pynq.MMIO(base, length)`（见 `integration/run_on_board.py::MotorBridge`）。
-
-| 偏移 | 名称 | 读写 | 位/范围 | 含义 |
-|---|---|---|---|---|
-| `0x00` | `CTRL` | W | bit0 使能（0 = 强制停车）；bit1 清急停 | 总开关 |
-| `0x04` | `SPEED_L` | W | 有符号 16 位，−1000 ~ +1000 | 左轮速度，负数反转 |
-| `0x08` | `SPEED_R` | W | 同上 | 右轮速度 |
-| `0x0C` | `HEARTBEAT` | W | 32 位递增 | 每 100 ms 写一次；**300 ms 不变 → 硬件急停** |
-| `0x10` | `ENC_L` | R | u32 | 左编码器计数（4 倍频；没接恒 0） |
-| `0x14` | `ENC_R` | R | u32 | 右编码器计数 |
-| `0x18` | `STATUS` | R | bit0 看门狗超时；bit1 急停锁死；bit2 电机使能中 | 状态回读 |
-
-**时序约定**：`PWM_PERIOD = CLK_HZ / PWM_HZ = 2500` 周期；`WDT_LIMIT = CLK_HZ/1000 × WDT_MS = 15e6` 周期。**改 `CLK_HZ` 必须和实际 AXI 时钟一致**，否则 PWM 频率与看门狗时间一起偏。
-
----
-
-## 7. Monitor JSON（板 → PC，5002/TCP，只读）
-
-```json
-{"version":1,"t":1793423322338,"seq":123,"rule":"R4","why":"vision left + left blocked",
- "action":"RIGHT","speed":35,"steering":45,
- "radar":{"valid":true,"front_distance":1.02,"left_distance":0.55,"right_distance":1.40,"t":1793423322300},
- "sectors":[[1.02,18],[1.02,22],...],  // 12 个 30° 扇区：[距离m, 点数]，s0 跨 0°
- "pts":[[a, d_mm, it, weak], ...],     // 点云，仅在 --monitor-pts 时下发
- "vision":{"obstacle":true,"class":"person","cx":0.30,"cy":0.55,"conf":0.82,"side":"left"},
- "fault":false,"status":{"watchdog_timeout":false,"estop":false},
- "vision_age_ms":87,"drops":0}
-```
-
-- 12 扇区公式与 PC 端 `radar_map_view.py::_sector12` 完全一致：`s_k = [k*30-15, k*30+15)`，`front = min(s11, s0, s1)`。
-- 广播端**只写不读**：某个监控客户端卡住只丢它，绝不阻塞 10 Hz 决策循环。
-
----
-
-## 8. 变更策略
-
-1. 改 schema / 阈值 / 映射 → `contract.CONTRACT_VERSION += 1`，在 PR 描述里写「破坏性变更」与影响面。
-2. 三处同时改：发送方、接收方、`metrics/scripts` 里引用的字段名。
-3. 改完必须跑：`python -m pytest car -q`、`cd host/app && bash joint/_run_it.sh person_left`、`python metrics/scripts/latency_stats.py`。
-4. 端口/传输方式变更（例如 5000 TCP↔UDP）属于**破坏性变更**，需在 `docs/architecture.md` §9 风险表里登记。
+> 当前实现是"PC 侧融合"：雷达直插 PC（或由别的进程喂到 15001），PC 算完只发一个距离。
+> 两条路径的上层协议完全一致（都是 4 字节距离帧），换路径不用改 PL。

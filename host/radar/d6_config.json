@@ -1,0 +1,19 @@
+{
+  "_notes": "COIN-D6 雷达桥配置。改这里就不用每次敲命令行；命令行参数会覆盖本文件。字段含义见 代码说明_D6雷达桥_20261031.md",
+
+  "port": "auto",
+  "baud": 230400,
+
+  "udp": "127.0.0.1:15001",
+  "hz": 10.0,
+  "bin_deg": 0.5,
+
+  "mount": "inverted",
+  "sign": -1,
+  "theta0": 0.0,
+  "mask": "",
+
+  "dist_udp": null,
+  "dist_hz": 20.0,
+  "dist_corridor": 35.0
+}

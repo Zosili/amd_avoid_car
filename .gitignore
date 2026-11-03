@@ -1,57 +1,26 @@
-# ---- Python ----
+# 编译与运行产物（每次重建都会重新生成）
 __pycache__/
 *.py[cod]
-*.egg-info/
-.pytest_cache/
-.mypy_cache/
-.venv/
-venv/
-.idea/
-.vscode/
+*.pyo
 
-# ---- 运行期产物（别提交）----
-host/app/joint/logs/_*/
-host/app/**/logs/_*/
-*.log
-!docs/legacy/*.log
-
-# ---- Vivado / Xilinx ----
+# Vivado 工程本体：.xpr/.dcp 写死开发机绝对路径，换机器必报错，
+# 用 fpga/src/tcl/ 里两个脚本三分钟可重建，故不入库
+prj/
 *.jou
-*.str
 .Xil/
-*.dcp
-*.runs/
-*.cache/
-*.hw/
-*.sim/
-*.ip_user_files/
-*.gen/
-*.xpr
-*.xpr.bak
-*.ltx
-*.wdb
-*.wcfg
-*vivado.log
-*vivado.jou
-usage_statistics_webtalk.*
+.vivado-ai/
 
-# ---- 二进制产物：需要时用 Git LFS（见 .gitattributes），默认不进普通提交 ----
-*.bit
-*.xsa
-*.hwh
-*.bin.bz2
-
-# ---- 模型与数据集（体积大，用下载脚本获取，见 host/model/MODEL.md）----
-*.pt
-*.onnx
-*.engine
-*.pdmodel
-*.xmodel
-*.xclbin
-*.rknn
-*.blob
-
-# ---- 系统 ----
+# 系统垃圾
+.DS_Store
 Thumbs.db
 desktop.ini
-.DS_Store
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+
+# 本地临时文件
+_run*.jsonl
+_run*.log
+_dump_*.png

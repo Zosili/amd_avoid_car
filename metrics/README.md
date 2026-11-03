@@ -1,88 +1,72 @@
-# 指标口径与复算方法
+# 指标汇总与证据索引
 
-> 对应指南 3.2.4（优化目标与量化指标）与 3.2.5.2（指标报告与原始证据）。
-> 汇总表：[`metrics.csv`](metrics.csv)（表头按指南规定，7 列，不擅自加列）。
+## 1 表格说明
 
-## 1. 填报纪律（先看这条）
+`metrics.csv` 按比赛要求的表头组织：
 
-- **`数值` 列写「待测」就代表没测过**，不许填估计值、理论值或别人家的数据。评审按 3.2.5.2 要能顺着「证据文件」复算到原始日志。
-- 每行都必须给全 **测量条件**：硬件型号、模型与精度、输入规格、软件版本、FPGA 时钟、功耗模式。
-- 同一项数据可以说明多个评分项，但**只能在一个评分项里计分**（3.2.5.6），所以别把同一张表往五个地方重复引用。
-
-## 2. 已实测项与复算命令
-
-| 指标 | 怎么复算 | 结果 |
-|---|---|---|
-| 决策控制周期 P50/P95/P99/最大、未命中率、停摆窗口 | `python metrics/scripts/latency_stats.py` | 见下 |
-| FPGA 资源与时序 | 打开 `fpga/report/*.rpt`（Vivado `report_utilization` / `report_timing_summary` 原始输出） | LUT 2.19 %、FF 1.07 %、WNS +1.096 ns |
-| 雷达帧率/坏帧/有效点 | 雷达接 PC，`python host/app/radar_console/radar_helper.py probe --port COM5 --secs 5` | 169.5 帧/s，0 坏帧 |
-| 协议解帧正确性 | `cd host/app/d6_tools && python d6_frame_analyze.py`（用仓库内 97022 B 抓包，不接雷达） | 1107 帧 / 85 B，官方 CS 命中 1109/1110 |
-
-`latency_stats.py` 的实测输出（本仓库日志，2026-10-31 复算）：
-
-```
-| 日志                               | 记录 | 周期P50 | P95  | P99   | max   | 未命中 |
-| board_run_20261024_202323.jsonl    |  98  | 100.0   | 101.0| 101.0 | 102.0 |  0     |
-| board_run_20261024_202348.jsonl    |  88  | 100.0   | 101.0| 101.1 | 102.0 |  0     |
-| joint_selftest_20261031.jsonl      |  20  | 101.0   | 102.1| 102.8 | 103.0 |  0     |
-```
-
-**这份数据还顺带抓出两次异常**，值得保留在日志里（说明脚本真的在测，不是摆设）：
-
-| 日志 | 异常 | 判读 |
-|---|---|---|
-| `fusion_run_20261020_174052.jsonl` | 周期 P99 = 4323.9 ms，最大 5513 ms（1 次停摆） | 交互式绘图/调试阻塞了主循环 → 监控与决策必须分进程（已在 `board_main.py` 用独立线程隔离） |
-| `fusion_run_20261020_174235.jsonl` | 周期 P50 = 304.5 ms、未命中率 93.33 % | 那次把决策循环配成了 ~3.3 Hz，不是 10 Hz；**报数前先确认 `CYCLE_MS`** |
-
-## 3. 尚未实测项：口径先定死，再测
-
-### 3.1 端到端响应延迟（核心，必须报 P50/P95/P99/max）
-
-- **起点**：传感器产生数据 → 取 PL 收到相机帧/雷达帧的那个 GPIO 翻转（逻辑分析仪通道 1）。
-- **终点**：电机驱动器 PWM 上升沿（逻辑分析仪通道 2，接 `pwm_l`）。
-- **样本**：同一场景连续 ≥ 200 次决策，形成 `logs/latency_run1.csv`（列：`t_send_ms,t_pwm_ms,latency_ms,rule,action`）。
-- **不要**用「日志里两条记录的时间差」冒充端到端延迟 —— 那只是调度周期。
-- 若用软件打点，必须同时报**时钟同步方法**与误差（3.2.4.3 明确要求）。
-
-### 3.2 任务闭环成功率（核心）
-
-- 场地固定：起点/终点/障碍位置画线；每轮 ≥ 20 次。
-- 成功 = 无碰撞、无人工干预、到达终点；失败 = 碰撞/卡死/超时；人工干预单列并写明触发原因。
-- 产出 `logs/task_trials.csv`（列：`trial,start_ts,result,manual_intervene,reason,rule_hist`）。
-
-### 3.3 通信性能（核心）
-
-- RTT：`Control.seq → Status.seq` 往返，报 P50/P95/P99 与丢包/超时率。
-- 单向延迟：需时钟同步（PTP/NTP 误差要写出来），否则只报 RTT。
-- 吞吐：TCP 5000/5001/5002 的有效载荷率（不是理论带宽）。
-
-### 3.4 AI 任务效果与推理性能（核心）
-
-- 效果：按场景选 mAP@0.5:0.95（检测）；验证集必须固定并写清来源与张数。
-- 性能：`batch=1`，分别报预处理 / 推理 / 后处理 / 总感知延迟；持续吞吐报 FPS。
-- 后端与精度：`onnxruntime + VitisAIExecutionProvider`（现状）或 ROCm 路径（补齐后），必须写版本号。
-
-## 4. 日志格式约定
-
-每行一条 JSON（`metrics/logs/*.jsonl`），字段：
-
-| 字段 | 说明 |
+| 列 | 含义 |
 |---|---|
-| `t` | Unix 毫秒（接收/决策时刻） |
-| `seq` | 决策序号，用于发现丢帧 |
-| `rule` | `OK` / `R1`–`R5` |
-| `why` | 人类可读的触发原因（含距离、置信度） |
-| `control` | 下发的 Control JSON（含 `pwm_l/pwm_r/in1..in4`） |
-| `fault` | 是否故障态 |
+| 指标名称 | 指标的可读名称 |
+| 类别 | 模型 / 视觉 / 决策 / 雷达 / 融合 / FPGA / 系统 / 通信 |
+| 数值 | 实测值 |
+| 单位 | 单位（无量纲填 `-`） |
+| 测量条件 | 硬件型号、模型精度、输入规格、软件版本、FPGA 时钟频率与功耗模式 |
+| 测试次数或时长 | 该数值是几次试验/多长时间得到的 |
+| 证据文件 | 原始日志、脚本或截图路径（相对本包根目录） |
 
-> 跨日志**不要**拼时间轴：不同 run 的 `t` 来自不同会话（甚至不同机器时钟），拼起来会算出几百万毫秒的"间隔"。`latency_stats.py` 因此按文件独立统计。
+> 「证据文件」若是**脚本**，表示该指标可现场重跑得到；若是**日志/图片**，表示已有留存的原始记录。
 
-## 5. 目录
+## 2 目录
 
-| 目录 | 放什么 | 现状 |
+```
+metrics/
+├── metrics.csv                指标汇总表
+├── logs/                      原始日志（训练曲线、联调日志、实现日志）
+│   ├── train_40ep_results.csv
+│   ├── fusion_live_tune.log
+│   └── impl_runme.log
+├── scripts/                   可重跑的测试脚本
+│   ├── test_cmd_frame.py      四档动作（CLEAR/WARN/STOP/断流）
+│   ├── probe_link.py          图传链路探针（发 '1' 点火、数收包）
+│   ├── probe_frame_size.py    帧长/像素格式校验（必须 614408）
+│   ├── match_check.py         真实雷达扫描 + 人框配对自检
+│   └── fake_radar_sender.py   假雷达：向 15001 发合成扫描
+└── evidence/                  证据材料
+    ├── ila_udp_frame.csv      ILA 抓的 UDP 帧解析波形
+    ├── frame_decoded.png      抓到的帧解码出的图像
+    ├── radar_scan_sample.json 一帧真实扫描（720 点）
+    ├── radar_cloud_demo.png   合成扫描点云
+    ├── radar_cloud_real.png   真实扫描点云
+    ├── four_state_check.md    四档动作板级验证记录
+    └── radar_behaviour_check.md 雷达急停/避障/掉线验证记录
+```
+
+## 3 常用脚本怎么跑
+
+```bash
+# 四档动作（轮子务必架空）
+python metrics/scripts/test_cmd_frame.py --ip 192.168.1.10 --port 5000
+
+# 图传链路是否通
+python metrics/scripts/probe_link.py --ip 192.168.1.10
+
+# 帧长/像素格式
+python metrics/scripts/probe_frame_size.py --ip 192.168.1.10
+
+# 雷达与人框配对自检（需要先起 host/radar 桥）
+python metrics/scripts/match_check.py
+```
+
+所有脚本只依赖 `host/deploy/requirements.txt` 里列的包，不写死任何绝对路径。
+
+## 4 未提供的证据（如实说明）
+
+| 项 | 状态 | 原因 |
 |---|---|---|
-| `metrics.csv` | 汇总表（7 列，指南口径） | 21 行：12 项已实测 + 9 项待测 |
-| `decision_period.csv` | 上表指标的机器可读版本（脚本生成） | 已生成 |
-| `logs/` | 原始 JSONL（决策日志、任务试验、延迟样本） | 15 份 |
-| `scripts/` | 可重跑脚本（`latency_stats.py` + 待建 `bench_infer.py`、`task_trials.py`） | 1 个 |
-| `evidence/` | 波形/示波器/逻辑分析仪截图 | 见 [evidence/README.md](evidence/README.md) |
+| 示波器/逻辑分析仪波形截图 | **无** | 手头没有示波器；跨时钟域与时序正确性改用 ILA 抓取 + Vivado 时序报告代替 |
+| 端到端延迟的仪器化测量 | **无** | 现为"帧间隔 + 推理耗时 + 发送周期"分段相加的估算，未做单次触发测量 |
+| 长时间（≥1 h）连续运行日志 | **无** | 未做耐久测试 |
+| `skill/latency_stats.py` 的 `.jsonl` 原始记录 | **已补** | 2026-11-04 01:54 采 341 帧真机数据（`logs/fusion_run_20261104_0154.jsonl`，分析见 `evidence/latency_run.md`） |
+| `skill/radar_probe.py` 的完整跑通记录 | **已补** | 2026-11-04 在板上用 MMIO 后端实测 12 s（`evidence/radar_probe_board.md`）；PC 侧 CH340 那组仍为早期记录 |
+
+以上是当前证据链的短板，后续有条件会补。**没有的数据一律标"无"，不估算、不编造。**

@@ -1,0 +1,27 @@
+# 由 tools/build_living_dataset.py 自动生成，不要手改类别顺序
+# 类别顺序的唯一事实源：tools/living_semantics.py
+# path 指向本机数据集根目录；数据集本身不随代码提交（体积大）
+path: ./living
+train: images/train
+val: images/val
+nc: 19
+names:
+  0: trashcan
+  1: slippers
+  2: wire
+  3: socks
+  4: carpet
+  5: book
+  6: feces
+  7: curtain
+  8: stool
+  9: bed
+  10: sofa
+  11: closestool
+  12: table
+  13: cabinet
+  14: ajardoor
+  15: opendoor
+  16: closedoor
+  17: stairway
+  18: person

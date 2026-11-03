@@ -1,0 +1,5 @@
+# COIN-D6 雷达工具依赖
+# 安装：python -m pip install -r requirements.txt
+pyserial>=3.5
+numpy>=1.20
+matplotlib>=3.4        # 只有 radar_view.py 需要；只跑 d6_stream.py 可以不装

@@ -1,22 +1,52 @@
-"指标名称","类别","数值","单位","测量条件","测试次数/时长","证据文件"
-"端到端响应延迟 P99","核心","待测","ms","口径：传感器产生数据/完成采集 → 执行器产生实际物理响应；起点=PL 收到帧的 GPIO 翻转，终点=电机驱动 PWM 上升沿；需逻辑分析仪打点（见 metrics/README.md）","—","metrics/evidence/README.md"
-"任务闭环成功率","核心","待测","%","成功=一次完整任务在无人工干预下完成（不碰撞、到达终点）；失败=碰撞/卡死/超时；人工干预单列；场地与路线固定","—","metrics/logs/task_trials.csv（待建）"
-"AI 任务效果 mAP@0.5:0.95","核心","待测","—","yolo11n int8；输入 640×480 RGB565→RGB；验证集与人/障碍类别定义待冻结","—","host/model/MODEL.md"
-"AI 单样本推理延迟","核心","待测","ms","batch=1；分别报预处理/推理/后处理/总感知；后端与精度见 host/model/MODEL.md","—","metrics/scripts/（待建 bench_infer.py）"
-"视觉输出频率","核心","待测","Hz","要求 ≥7 Hz（对应 vision_timeout_ms=300）；TCP 5000 行 JSON 计数","—","metrics/logs/（待采）"
-"通信 RTT（板 ↔ 电机侧）","核心","待测","ms","TCP 5001，Control.seq → Status.seq 往返；单向延迟需先做时钟同步","—","metrics/logs/（待采）"
-"决策控制周期 P99","场景-实时控制","101.0","ms","开发机 Windows 假硬件联调（board_main.py --radar fake --fake-front 1.50，10 Hz 循环）；Python 3.12；板端 Python 3.6.9 需复测","97 个周期 / 9.74 s","metrics/logs/board_run_20261024_202323.jsonl"
-"控制周期抖动 P99","场景-实时控制","1.0","ms","同上；抖动 = Δt − 100 ms","97 个周期","metrics/logs/board_run_20261024_202323.jsonl"
-"截止期未命中率","场景-实时控制","0.00","%","同上；Δt > 110 ms（目标 100 ms + 10% 容差）记未命中","97 个周期","metrics/logs/board_run_20261024_202323.jsonl"
-"WNS","场景-FPGA 数据处理","1.096","ns","Vivado 2025.2；xc7z020clg400-2；sys_clk 50 MHz；impl_1 routed；约束全部满足","1 次实现","fpga/report/timing_summary_routed.rpt"
-"WHS","场景-FPGA 数据处理","0.087","ns","同上","1 次实现","fpga/report/timing_summary_routed.rpt"
-"LUT 使用率","场景-FPGA 资源","2.19","%","1164 / 53200；Design State = Fully Placed","1 次实现","fpga/report/utilization_placed.rpt"
-"FF 使用率","场景-FPGA 资源","1.07","%","1137 / 106400；同上","1 次实现","fpga/report/utilization_placed.rpt"
-"BRAM 使用率","场景-FPGA 资源","0.36","%","0.5 tile / 140（RAMB18 ×1）；同上","1 次实现","fpga/report/utilization_placed.rpt"
-"DSP 使用率","场景-FPGA 资源","0.00","%","0 / 220；同上","1 次实现","fpga/report/utilization_placed.rpt"
-"雷达帧率","场景-视觉与传感","169.5","帧/s","COIN-D6 @230400 8N1，PC COM5，桌面/手举各多次","4 次采样 / 18 s","docs/legacy/radar_health_check_20261031.md"
-"雷达坏帧数","场景-视觉与传感","0","帧","同上；官方 CS 校验 + 帧长 85 B 判定","4 次采样","docs/legacy/radar_health_check_20261031.md"
-"雷达有效点率","场景-视觉与传感","92.9","%","桌面 92.9 / 手举空中 98.1；每圈约 420 个采样点","4 次采样","docs/legacy/radar_health_check_20261031.md"
-"FPGA 视觉链路帧率","场景-视觉与传感","待测","fps","OV5640 → UDP 1234；需在 PC 侧按帧头计数并长时间统计","—","host/app/vision_pc/view.py"
-"连续稳定运行时长","场景-系统可靠性","待测","min","整机通电连续运行，记录异常/人工干预次数与恢复时间","—","metrics/logs/（待采）"
-"Skill 干净环境部署时间","场景-Skill 复用","待测","min","干净环境（新 venv/新板卡）按 skill/README.md 执行到首次出结果","—","skill/README.md"
+﻿指标名称,类别,数值,单位,测量条件,测试次数或时长,证据文件
+模型训练轮数,模型,40,epoch,"YOLO11n, imgsz=640, batch=16, livingB_v2 数据集(8510 图/19 类); ROCm 7.14 + Radeon 780M",40 轮 共 3646.8 s,metrics/logs/train_40ep_results.csv
+mAP50(19类平均),模型,0.8812,-,"同上权重; 验证集 2098 图; conf=0.001, IoU=0.6",2098 图 单次评估,metrics/logs/train_40ep_results.csv
+mAP50-95(19类平均),模型,0.7435,-,"同上",同上,metrics/logs/train_40ep_results.csv
+Precision(19类平均),模型,0.8594,-,"同上",同上,metrics/logs/train_40ep_results.csv
+Recall(19类平均),模型,0.8150,-,"同上",同上,metrics/logs/train_40ep_results.csv
+person 类 mAP50,模型,0.857,-,"person 为第 18 类; 同上验证集",同上,metrics/logs/train_40ep_results.csv
+检测类别数,模型,19,类,"0~17 生活物品 + 18 person; 与 RTL/host 侧 NAMES 表一致",1 次一致性核对,host/app/detect_fusion_live.py
+模型数值精度,模型,FP32,-,"ONNX 导出 FP32; 未量化(INT8 版精度下降明显已放弃); DirectML 后端",1 次精度对比,host/model/MODEL.md
+图像分辨率,视觉,640x480,px,"OV5640 RGB565; PL 侧直出不做缩放; cam_pclk 24MHz",实测 1 帧,metrics/logs/fusion_live_tune.log
+单帧字节数,视觉,614408,B,"4B 帧头(F0 5A A5 0F) + 4B 宽高 + 640*480*2",实测 100 帧帧头间距,metrics/logs/fusion_live_tune.log
+端到端帧率,视觉,5.6,fps,"PC 收帧计数; Windows 11 25H2 + DirectML; 连续采集",163 s 收 918 帧,metrics/logs/fusion_live_tune.log
+单帧推理耗时,视觉,16.5,ms,"DirectML ExecutionProvider device_id=0 (Radeon 780M); 输入 1x3x640x640 FP32",连续 900 帧,metrics/logs/fusion_live_tune.log
+相机到 PC 平均帧间隔,视觉,178,ms,"由端到端帧率 5.6fps 推算",同上,metrics/logs/fusion_live_tune.log
+距离帧下发周期,决策,50,ms,"PC -> PL UDP 5000; 5 字节 AA 55 + dist(u16) + steer",20 Hz 连续,metrics/scripts/test_cmd_frame.py
+看门狗超时,决策,400,ms,"PL eth_rxc 125MHz; WDT_TIMEOUT_US=400000; 超时进 SAFE 停车静音",1 次断流实测,metrics/evidence/four_state_check.md
+停车阈值,决策,1000,mm,"STOP_DIST_MM; 人 <=1m 停车 + 连续长鸣",1 次实测,metrics/evidence/four_state_check.md
+预警阈值,决策,3000,mm,"WARN_DIST_MM; 1~3m 前进 + 每秒 120ms 短鸣",1 次实测,metrics/evidence/four_state_check.md
+四档动作正确性,决策,4/4,档,"5m / 2m / 0.5m / 断流 逐档实测; 位流 md5 cf922bec",4 次,metrics/evidence/four_state_check.md
+转向最小保持时间,决策,300,ms,"STEER_HOLD_US; 防内轮反向高频换向冲击 H 桥; eth_rxc 125MHz",代码级定量,fpga/src/rtl/motor_decision.v
+雷达急停阈值,雷达,150,mm,"RADAR_ESTOP_MM; <15cm 停车 + 中速 3 声; 回波 >25cm 解除",1 次实测,metrics/evidence/radar_behaviour_check.md
+雷达避障区间,雷达,150~1000,mm,"AVOID_DIST_MM=1000, 下限 150; 前方 ±60°; 差速原地转",1 次实测,metrics/evidence/radar_behaviour_check.md
+雷达串口帧率,雷达,170.4,帧/s,"COIN-D6 @ COM11 230400 8N1; 85 字节 AA 55 帧 + 双字节异或校验",3 s 自检,host/radar/d6_stream.py
+雷达坏帧数,雷达,0,帧,"同上; 校验失败即丢弃",3 s,host/radar/d6_stream.py
+雷达转速,雷达,10.3,圈/s,"同上",3 s 内 31 圈,host/radar/d6_stream.py
+雷达有效点率,雷达,88.7,%,"12060 点中 10696 有效; <8cm 与 >6m 视为无效",3 s,host/radar/d6_stream.py
+雷达扫描输出频率,雷达,9.2,Hz,"UDP 15001 端口计数, JSON angles/ranges",8 s 收 74 帧,host/radar/d6_stream.py
+雷达扫描点数,雷达,720,点,"0~359.5° 步长 0.5°; 无回波为 null",同上,host/radar/d6_stream.py
+可移植版自检帧率,雷达,171.5,帧/s,"d6_stream.py --selftest, COM11 auto; 分箱+中值滤波",3 s 516 帧,host/radar/d6_stream.py
+可移植版有效点率,雷达,93.3,%,"12084 点中 11271 有效(初版 88.7%)",3 s,host/radar/d6_stream.py
+真实扫描命中,融合,1,次,"真实 720 点扫描 + 居中人框 -> source=lidar 1.93m",1 次,metrics/scripts/match_check.py
+Slice LUT,FPGA,2332,个,"xc7z020clg400-2; Vivado 2025.2; 占 53200 的 4.38%",1 次实现,fpga/report/timing.md
+Slice Register,FPGA,2736,个,"同上; 占 106400 的 2.57%",1 次实现,fpga/report/timing.md
+Block RAM Tile,FPGA,0.5,个,"同上; 占 140 的 0.36%",1 次实现,fpga/report/timing.md
+DSP,FPGA,0,个,"同上; 未使用(全开环后 PID 乘法链被综合优化掉)",1 次实现,fpga/report/timing.md
+Bonded IOB,FPGA,46,个,"同上; 占 125 的 36.80%",1 次实现,fpga/report/timing.md
+建立时间裕量 WNS,FPGA,1.356,ns,"eth_rxc 125MHz / sys_clk 50MHz / cam_pclk 24MHz; 0 违例",1 次实现,fpga/report/timing.md
+保持时间裕量 WHS,FPGA,0.010,ns,"同上; 正但很薄,加 eth_rxc 域逻辑需复检",1 次实现,fpga/report/timing.md
+FPGA 决策时钟,FPGA,125,MHz,"eth_rxc 为决策模块时钟; sys_clk 50MHz 为电机/蜂鸣输出域",代码级,fpga/src/rtl/top.v
+端到端响应延迟,系统,<=200,ms,"帧间隔 178 + 推理 16.5 + 发送周期 <=50",估算,metrics/logs/fusion_live_tune.log
+PL 决策最坏响应,系统,<=400,ms,"断流兜底路径; 由看门狗超时给出",1 次断流实测,metrics/evidence/four_state_check.md
+图传目标端口,通信,1234,-,"板子 -> PC; UDP",-,host/app/detect_fusion_live.py
+距离帧目标端口,通信,5000,-,"PC -> 板子; UDP",-,host/app/detect_fusion_live.py
+雷达扫描 UDP 端口,通信,15001,-,"JSON angles/ranges; 5001 被本机 NI 服务占用故改用 15001",-,host/radar/d6_stream.py
+雷达板载帧率,雷达,167.7,帧/s,"AXI UART Lite @0x42C00000 直读(板子无 /dev/ttyUL0); COIN-D6 @230400; 雷达静置桌面、扫描面朝空",12 s 共 2012 帧,metrics/evidence/radar_probe_board.md
+雷达板载坏帧率,雷达,1.04,%,"同上; 校验失败即计入",12 s 共 21 帧,metrics/evidence/radar_probe_board.md
+雷达板载有效点率,雷达,43.5,%,"同上; <8cm/>6m 或弱回波为无效。此值受场景影响: 本次朝空旷处,大量光束无回波",12 s,metrics/evidence/radar_probe_board.md
+控制环帧间隔 P50,实时性,257,ms,"detect_fusion_live.py --jsonl 逐帧记录; 桌面无人; 未开 --send; DML device_id=0",78.1 s / 341 帧,metrics/evidence/latency_run.md
+控制环帧间隔 P99,实时性,316,ms,"同上; 抖动 P99 = 116 ms",78.1 s / 341 帧,metrics/evidence/latency_run.md
+融合环平均帧率,实时性,4.37,fps,"同上; 帧驱动（有图才推理），非固定定时环",78.1 s / 341 帧,metrics/evidence/latency_run.md
+推理耗时 P50,实时性,16.5,ms,"同上; 纯 sess.run 前向，不含收图/letterbox/后处理",78.1 s / 341 帧,metrics/evidence/latency_run.md
+推理占帧预算比例,实时性,6,%,"推理 16.5 ms / 帧间隔 257 ms；说明瓶颈在图传不在 AI",同上,metrics/evidence/latency_run.md
