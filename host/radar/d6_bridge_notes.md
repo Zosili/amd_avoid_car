@@ -51,7 +51,7 @@ D6 协议逆向的完整依据在 `zheng/radar/d6_protocol.py` 文件头（官�
 | `run.bat` | Windows 一键菜单（自动找 Python，找不到给提示） | 现场双击 |
 | `run.sh` | Linux / macOS 同功能入口 | 同上 |
 | `demo_cloud.png` | 云图样例（合成数据） | 报告/交接参考 |
-| `D6_BRIDGE_NOTES.md` | 本文 | 接手 Agent |
+| `d6_bridge_notes.md` | 本文 | 接手 Agent |
 
 > `radar_provider.py` **不在分发包里**：它 `import protocol`（joint 工程的模块），只用于板上
 > `board_main.py` 那一侧，拿出去缺依赖。分发时请按 §15 的清单打包。
@@ -323,7 +323,7 @@ python radar_view.py --mount inverted --mask 137:223   # 覆盖配置
 ```
 d6_stream.py   radar_view.py   d6_protocol.py   d6_config.json
 requirements.txt   README.md   run.sh   run.bat
-D6_BRIDGE_NOTES.md   demo_cloud.png
+d6_bridge_notes.md   demo_cloud.png
 ```
 
 **不要放**：`radar_provider.py`（缺 `protocol` 依赖）、`__pycache__`、任何真实环境的 `real_cloud.png`。

@@ -577,7 +577,16 @@ def main():
 
             # 逐帧落盘：t 用真机毫秒时间戳，latency_stats 靠相邻两行的差值算周期
             if jf:
+                # 同时兼容两种口径：
+                #   skill/latency_stats.py      只认 t（周期分布）
+                #   metrics/scripts/latency_stats.py  认 control.action（动作分布）
+                act = ("STOP" if res.state.value == "STOP" else
+                       "LEFT" if steer == 1 else
+                       "RIGHT" if steer == 2 else "GO")
                 jf.write(json.dumps({"t": int(time.time() * 1000),
+                                     "seq": frame_cnt,
+                                     "rule": "PL",          # 决策在 PL，不是 PC 的 R1~R5
+                                     "control": {"action": act},
                                      "frame": frame_cnt,
                                      "fps": round(fps, 2),
                                      "infer_ms": round(t_inf, 2),

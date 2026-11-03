@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | 1 | Zynq 开发板 | 正点原子 领航者 ZYNQ7020 (V2)，`xc7z020clg400-2` | 1 | — | PL 承担图传 + 决策，PS 跑 PYNQ |
 | 2 | 摄像头模块 | OV5640，500 万像素，RGB565 输出 | 1 | 板载 FPC（DVP 8bit + SCCB） | 排线金手指朝下，锁扣压紧 |
-| 3 | 2D 激光雷达 | COIN-D6（LD06 类，85 字节 `AA 55` 帧 + 双字节异或校验） | 1 | UART 230400 8N1 → 板子 PS 侧 AXI UART Lite | 见 `host/radar/D6_BRIDGE_NOTES.md` |
+| 3 | 2D 激光雷达 | COIN-D6（LD06 类，85 字节 `AA 55` 帧 + 双字节异或校验） | 1 | UART 230400 8N1 → 板子 PS 侧 AXI UART Lite | 见 `host/radar/d6_bridge_notes.md` |
 | 4 | TF 卡 | ≥8 GB，烧 PYNQ 2.7 镜像 | 1 | SD 槽 | 存 PYNQ 根文件系统 + overlay |
 
 ### 1.2 执行器与驱动

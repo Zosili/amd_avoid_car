@@ -60,7 +60,7 @@ EPOCHS = 15           # 训练轮数。本次只验链路：15 轮够看 person 
 IMGSZ = 640           # 输入尺寸。416 是 780M 的甜点；改 640 会让 CPU 预处理涨 2.4 倍，见 README
 BATCH = 16            # 批大小。实测（AMP fp16 / 780M / 640）batch 8/16/32 每张耗时
                       # 7.68 / 7.43 / 7.55 ms，吞吐恒定 ~130 img/s —— GPU 已完全饱和，
-                      # 加大 batch 不提速（详见 LIVING_DETECT.md「训练速度实测」）。
+                      # 加大 batch 不提速（详见 living_detect.md「训练速度实测」）。
                       # 保留 16 的理由不是速度，而是 BatchNorm 统计更稳、梯度噪声更小。
                       # OOM 就回退 8 / 4 / 2。
 PATIENCE = 30         # 连续多少轮 mAP 不涨就早停

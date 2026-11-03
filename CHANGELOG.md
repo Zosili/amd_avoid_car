@@ -67,7 +67,7 @@ md5 `cf922bec1ea1f8a09ebabf4e1b434d3d`，2026-11-03 21:10 构建。
 |---|---|
 | `启动融合检测.bat` | `run.bat` |
 | `host/radar/启动.bat` | `host/radar/run.bat` |
-| `host/radar/代码说明_D6雷达桥.md` | `host/radar/D6_BRIDGE_NOTES.md` |
+| `host/radar/代码说明_D6雷达桥.md` | `host/radar/d6_bridge_notes.md` |
 | `report/设计报告.md` | `report/design_report.md` |
 
 全包已扫描确认无中文文件名；引用处（README / interface.md / 雷达文档）已同步更新。
@@ -182,8 +182,8 @@ md5 `cf922bec1ea1f8a09ebabf4e1b434d3d`，2026-11-03 21:10 构建。
 | 文件 | 来源 | 定位 |
 |---|---|---|
 | `skill/README.md` | **新包**（替换） | 五步定位阶梯 + 5 个工具的适用范围/用法/失效条件/复用结果 |
-| `skill/OVERVIEW.md` | 新包 `功能介绍.md` **改名** | 这套 skill 是什么、为什么算可复用（写报告可引用） |
-| `skill/LESSONS.md` | **原 `README.md` 改名** | 9 条实战坑，内容未动，仅加了三份文档的分工说明 |
+| `skill/overview.md` | 新包 `功能介绍.md` **改名** | 这套 skill 是什么、为什么算可复用（写报告可引用） |
+| `skill/lessons.md` | **原 `README.md` 改名** | 9 条实战坑，内容未动，仅加了三份文档的分工说明 |
 | `skill/*.py`（5 个） | 新包 | `hwh_probe` / `radar_probe` / `bench_infer` / `latency_stats` / `check_timing` |
 | `skill/requirements.txt` | 新包（去 BOM） | 依赖清单 |
 
@@ -206,14 +206,14 @@ md5 `cf922bec1ea1f8a09ebabf4e1b434d3d`，2026-11-03 21:10 构建。
 |---|---|---|
 | `skill/README.md` §7 | WNS +1.071 / WHS +0.014 / LUT 4.43% / FF 2.59% | **+1.356 / +0.010 / 4.38% / 2.57%**（对齐 22:27 位流） |
 | `skill/README.md` §1 | 提到 `robot/overlay/`（不属于本仓库的路径） | 改为"当时板子上跑的 bitstream 里没有 `axi_uartlite`" |
-| `skill/OVERVIEW.md` §8 | check_timing 示例输出为旧版（WNS +1.096 / LUT 1164） | 换成**真实跑出来的**当前输出 |
-| `skill/OVERVIEW.md` §9 | 文件清单缺 OVERVIEW/LESSONS，大小过时 | 补齐 9 项，注明三份文档分工 |
+| `skill/overview.md` §8 | check_timing 示例输出为旧版（WNS +1.096 / LUT 1164） | 换成**真实跑出来的**当前输出 |
+| `skill/overview.md` §9 | 文件清单缺 OVERVIEW/LESSONS，大小过时 | 补齐 9 项，注明三份文档分工 |
 | `skill/README.md` §6 | 声称已验证 latency_stats，但包内无 `.jsonl` | 补一条**如实说明**：原始记录已删，数字来自当时实测 |
 | `metrics/README.md` §4 | 缺证据只列 3 项 | 增补 `.jsonl` 缺失、`radar_probe` 未在干净环境重跑两条 |
 
 ### 4. 合规
 
-- 中文文件名 `功能介绍.md` → **`OVERVIEW.md`**（竞赛要求仓库内不得出现中文文件名）
+- 中文文件名 `功能介绍.md` → **`overview.md`**（竞赛要求仓库内不得出现中文文件名）
 - 5 个脚本 `py_compile` 全过；全包扫描**无硬编码绝对路径**（`hwh_probe`/`check_timing`/`latency_stats`
   只用标准库，可直接在别的机器跑）
 - `requirements.txt` 去掉 UTF-8 BOM（老版本 pip 会读成乱码包名）
@@ -257,7 +257,7 @@ python skill/selftest.py --with-infer  # 再加推理基准
 ```
 
 实测两行 PASS。缺文件时打 `[SKIP]` 并算未通过，不会假装成功。
-已写入 `skill/README.md` §11、`skill/OVERVIEW.md` 文件清单、根 `README.md` 目录树。
+已写入 `skill/README.md` §11、`skill/overview.md` 文件清单、根 `README.md` 目录树。
 
 ### 7. 在板上实跑 `radar_probe`（2026-11-04 01:20）
 
@@ -309,7 +309,7 @@ training/
 ├── train_yolo.py      训练入口（原 D:/FPGA/ultralytics/train_yolo.py）
 ├── data_living.yaml   19 类配置（path 由绝对路径改为相对占位 ./living）
 ├── tools/             43 个脚本（采集/清洗/标注/审计/评测/后端选型）
-└── reports/           LIVING_DETECT.md、LIVING_50EP_REPORT.md、NEWMAT_1030_REPORT.md
+└── reports/           living_detect.md、living_50ep_report.md、newmat_1030_report.md
 ```
 
 共 505 KB，未包含数据集、`*.pt`、`runs/`、`vendor/`（107 MB 第三方运行时）。
@@ -374,3 +374,31 @@ training/
 | `metrics/metrics.csv` | 新增 5 行实时性指标（51 行，7 列无错列） |
 | `skill/README.md` §6 | 换成实测值 + 帧驱动环的口径提醒 |
 | `metrics/README.md` §4 | jsonl 一项从「无」改为「已补」 |
+
+## 2026-11-04 02:30 —— 清掉第一版遗留，仓库只保留当前实现
+
+第一版仓库（2026-10-31 快照）的内容已全部失效，按"全删覆盖"处理：
+
+### 删除
+
+| 路径 | 是什么 | 为什么删 |
+|---|---|---|
+| `AGENTS.md`、`CONTRIBUTING.md`、`.gitattributes` | 第一版的操作手册 | 通篇讲已删除的 `host/app/car/` 与 `motor_axi.v`，照着做会报错 |
+| `tools/`、`metrics/scripts/` | 布局自检 + 决策周期统计 | 依赖第一版的 `car` 包与 R1–R5 规则，本版不存在 |
+| `docs/assets/`、`docs/legacy/` | 板卡照片、交接文档 | 与当前 `docs/` 无引用关系，避免两套口径并存 |
+| `host/app/{car,integration,joint,radar_console,d6_tools,vision_pc}` | 第一版并行实现（TCP） | 与当前 UDP 架构冲突 |
+| `fpga/src/vision/`、`fpga/src/motor/motor_axi.v` | 旧 RTL 布局 | 已合并进 `fpga/src/rtl/` |
+
+### 修复（删除后暴露的问题）
+
+- `metrics/metrics.csv` 表头 `测试次数或时长` → `测试次数/时长`（规范原文写法）
+- 6 个文件改小写：`lessons.md`、`overview.md`、`living_detect.md`、`living_50ep_report.md`、
+  `newmat_1030_report.md`、`d6_bridge_notes.md`（规范要求纯小写）
+- `BOOT.BIN` 保留大写：Xilinx 启动镜像固定名，SD 卡与 `host/app/integration` 都按这个名字检查
+- `fpga/src/README.md` 按当前扁平结构重写（原先描述 `vision/` + `constrs/`）
+- `host/app/detect_fusion_live.py` 的 jsonl 增加 `control.action / seq / rule` 字段
+- CI 改为只跑两件不依赖第一版代码的事：全仓 `compileall` + `skill/selftest.py`
+
+### 结果
+
+仓库 202 个文件，结构 = 当前工作区，无重复实现、无死链。

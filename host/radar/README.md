@@ -12,7 +12,7 @@
 ├── requirements.txt        依赖
 ├── run.bat                Windows 一键菜单
 ├── run.sh                  Linux / macOS 入口
-└── D6_BRIDGE_NOTES.md      ★ 交接手册（给接手的人/agent）
+└── d6_bridge_notes.md      ★ 交接手册（给接手的人/agent）
 ```
 
 ## 3 分钟上手
@@ -68,5 +68,5 @@ python radar_view.py --demo --save demo.png
 
 ## 详细文档
 
-`D6_BRIDGE_NOTES.md` —— 协议来源、接口契约、参数表、标定流程、故障排查、倒装与车底安装的工程结论、
+`d6_bridge_notes.md` —— 协议来源、接口契约、参数表、标定流程、故障排查、倒装与车底安装的工程结论、
 以及给接手 agent 的边界约束。

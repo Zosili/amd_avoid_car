@@ -104,7 +104,7 @@ RGMII 的 `eth_rxc/eth_rxd/eth_txc/eth_txd` 全部接在 PL 引脚上。PS 侧�
 | **AMD NPU（Ryzen AI 1.6.0）** | YOLO11n 的 ONNX 含 `Split`/`strided_slice` 等算子，NPU 不支持会大量回退 CPU，实测收益不如 DirectML；且需要 `provider_options['target']`/`xclbin` 等额外配置，踩坑成本高 |
 | **纯 CPU 推理** | 同模型 CPU 上单帧耗时远大于 16.5 ms，跟不上 20 Hz 的距离帧下发 |
 | **云端 API** | 场地无外网；延迟不可控（几百 ms 抖动），且断网即失效 |
-| **传统视觉（背景差分/运动检测）** | 对**静止的人**完全失效，而"人站着不动"恰恰是最需要停的场景。（注：该方法仍被保留用于数据集清洗——`tools/motion_verify.py` 用时间中值背景差区分"真人在动"与"挂着的衣服"） |
+| **传统视觉（背景差分/运动检测）** | 对**静止的人**完全失效，而"人站着不动"恰恰是最需要停的场景。（注：该方法仍被保留用于数据集清洗——`training/tools/motion_verify.py` 用时间中值背景差区分"真人在动"与"挂着的衣服"） |
 | **YOLOv8 替代** | 曾因 NPU 算子兼容性考虑过；最终部署走 GPU/DirectML，11n 的精度/速度比更优，未采用 |
 
 ### 3.4 测距与工程细节

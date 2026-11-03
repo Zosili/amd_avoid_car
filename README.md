@@ -122,8 +122,8 @@ car7020/
 │   └── reports/               三份训练与选型分析报告
 ├── skill/                     ★ 可复用能力包（5 个可独立运行的判定工具）
 │   ├── README.md              五步定位阶梯 + 五个工具的四要素说明
-│   ├── OVERVIEW.md            这个目录是什么、为什么算可复用（写报告可引用）
-│   ├── LESSONS.md             9 条实战坑（含适用范围/失效条件/复用结果）
+│   ├── overview.md            这个目录是什么、为什么算可复用（写报告可引用）
+│   ├── lessons.md             9 条实战坑（含适用范围/失效条件/复用结果）
 │   ├── hwh_probe.py           只读解析 .hwh：这份 bitstream 里有没有那个外设
 │   ├── radar_probe.py         串口传感链路探针（帧率/坏帧率/有效点率/帧长）
 │   ├── bench_infer.py         推理基准（预热与稳态分离、报分位数）
@@ -153,7 +153,7 @@ car7020/
 | `host/deploy/` | 同 | — |
 | （无） | `host/radar/` | COIN-D6 雷达驱动与桥接（可独立于整车使用） |
 | `metrics/` | 同 | `metrics.csv` + `logs/` + `scripts/` + `evidence/` |
-| `skill/README.md` | 同 | 另有 `OVERVIEW.md`（定位）与 `LESSONS.md`（经验），三份分工见 skill 目录 |
+| `skill/README.md` | 同 | 另有 `overview.md`（定位）与 `lessons.md`（经验），三份分工见 skill 目录 |
 | （无） | `training/` | 数据集构建与训练脚本。推荐结构未规定，但报告要写"模型怎么来的"，单列更清楚 |
 | `report/` | 同 | `design_report.md` |
 
@@ -209,7 +209,7 @@ sudo systemctl daemon-reload && sudo systemctl enable radar.service
 sudo systemctl start radar.service   # 立即启动
 ```
 
-> 三个必须知道的坑（详见 `skill/LESSONS.md`）：
+> 三个必须知道的坑（详见 `skill/lessons.md`）：
 > ① overlay 加载要 `XILINX_XRT=/usr` + sudo（否则 "No Devices Found"）
 > ② FCLK0 实际 55.56MHz（不是 100MHz），UART 波特率参数已按此配好
 > ③ AXI UART Lite FIFO 只 16 字节，脚本已用 RX_FULL 批量读避免溢出
@@ -243,8 +243,8 @@ sudo systemctl start radar.service   # 立即启动
 | 资源占用与时序 | `fpga/report/timing.md` |
 | 重建位流 | `fpga/build/README.md` |
 | 模型来源与精度 | `host/model/MODEL.md` |
-| 雷达协议与标定 | `host/radar/D6_BRIDGE_NOTES.md` |
-| 踩过哪些坑（可复用工作流） | `skill/LESSONS.md` |
-| 有没有可复用的判定工具 | `skill/README.md`（用法）+ `skill/OVERVIEW.md`（为什么） |
+| 雷达协议与标定 | `host/radar/d6_bridge_notes.md` |
+| 踩过哪些坑（可复用工作流） | `skill/lessons.md` |
+| 有没有可复用的判定工具 | `skill/README.md`（用法）+ `skill/overview.md`（为什么） |
 | 模型是怎么训出来的 | `training/README.md`（管线）+ `training/reports/`（结论） |
 | 版本变更 | `CHANGELOG.md` |

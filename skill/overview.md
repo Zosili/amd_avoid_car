@@ -247,8 +247,8 @@ $ python skill/check_timing.py --reports fpga/report
 | 文件 | 大小 | 作用 |
 |---|---|---|
 | `README.md` | 10.9 KB | 五步阶梯 + 五模块四要素说明（操作手册） |
-| `OVERVIEW.md` | 11.3 KB | 本文件：定位、解决什么问题、为什么算可复用 |
-| `LESSONS.md` | 9.8 KB | 本项目踩过的 9 条具体坑，每条含适用范围/用法/失效条件/复用结果 |
+| `overview.md` | 11.3 KB | 本文件：定位、解决什么问题、为什么算可复用 |
+| `lessons.md` | 9.8 KB | 本项目踩过的 9 条具体坑，每条含适用范围/用法/失效条件/复用结果 |
 | `hwh_probe.py` | 5.3 KB | 只读解析 `.hwh` |
 | `radar_probe.py` | 6.3 KB | 串口传感链路探针 |
 | `bench_infer.py` | 4.6 KB | 推理基准（后端可切） |

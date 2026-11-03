@@ -1,4 +1,4 @@
-﻿指标名称,类别,数值,单位,测量条件,测试次数或时长,证据文件
+﻿指标名称,类别,数值,单位,测量条件,测试次数/时长,证据文件
 模型训练轮数,模型,40,epoch,"YOLO11n, imgsz=640, batch=16, livingB_v2 数据集(8510 图/19 类); ROCm 7.14 + Radeon 780M",40 轮 共 3646.8 s,metrics/logs/train_40ep_results.csv
 mAP50(19类平均),模型,0.8812,-,"同上权重; 验证集 2098 图; conf=0.001, IoU=0.6",2098 图 单次评估,metrics/logs/train_40ep_results.csv
 mAP50-95(19类平均),模型,0.7435,-,"同上",同上,metrics/logs/train_40ep_results.csv

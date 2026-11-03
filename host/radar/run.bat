@@ -52,7 +52,7 @@ if "%CH%"=="4" (
 if "%CH%"=="5" "%PY%" radar_view.py
 if "%CH%"=="6" "%PY%" radar_view.py --save cloud.png --secs 4
 if "%CH%"=="7" "%PY%" radar_view.py --demo
-if "%CH%"=="8" start "" "D6_BRIDGE_NOTES.md"
+if "%CH%"=="8" start "" "d6_bridge_notes.md"
 if "%CH%"=="0" exit /b
 
 echo.

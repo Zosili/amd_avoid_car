@@ -44,12 +44,12 @@ training/
 
 | 用途 | 环境 |
 |---|---|
-| 训练 | Python 3.12 + `torch 2.10+rocm`（ROCm 7.14 / Radeon 780M），见 `reports/LIVING_DETECT.md` |
+| 训练 | Python 3.12 + `torch 2.10+rocm`（ROCm 7.14 / Radeon 780M），见 `reports/living_detect.md` |
 | 推理/导出 | `onnxruntime`（DirectML 后端跑 780M） |
 | 依赖 | `ultralytics`、`opencv-python`、`numpy`、`pyyaml`、`pyserial`（雷达相关） |
 
 > **CUDA 与 ROCm 两套环境必须隔离**。本项目训练走 ROCm，遇到速度问题时的实测结论在
-> `reports/LIVING_DETECT.md` 第 5 节（GPU 算力是唯一瓶颈，加 batch、加 workers、改分辨率都无效）。
+> `reports/living_detect.md` 第 5 节（GPU 算力是唯一瓶颈，加 batch、加 workers、改分辨率都无效）。
 
 ## 4 复现
 
@@ -85,4 +85,4 @@ person 类只有 **275 张图 / 502 个框（占 9.6%）**，这是 mAP 上不�
 - 实图检出 19/24 对 19/24，**完全打平**；
 - 18 类物品在同样加轮数下有 17 涨 1 跌。
 
-所以「加训练轮数」对看人无效，只能补数据。详证见 `reports/LIVING_50EP_REPORT.md`。
+所以「加训练轮数」对看人无效，只能补数据。详证见 `reports/living_50ep_report.md`。
