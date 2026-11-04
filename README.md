@@ -87,6 +87,8 @@ Zynq-7020（PL 决策）+ Windows PC（YOLO 感知）+ COIN-D6 雷达（板载 P
 car7020/
 ├── README.md                  本文件（项目简介 + 复现步骤 + 目录对照）
 ├── CHANGELOG.md               版本变更记录
+├── LICENSE                    MIT（仅覆盖自研部分）
+├── third_party.md             第三方组件与许可说明
 ├── run.bat                    一键启动（薄壳，转调 host/deploy/run_fusion.bat）
 ├── docs/
 │   ├── architecture.md        系统架构、时钟域、状态机、模块清单
@@ -260,7 +262,7 @@ sudo systemctl start radar.service   # 立即启动
 ## 许可证
 
 - **本项目自研部分**（决策 RTL、上位机程序、雷达桥、训练与指标脚本、文档）：**MIT**，见 [`LICENSE`](LICENSE)
-- **第三方组件**（正点原子以太网 / OV5640 RTL 例程、Ultralytics YOLO11n 权重、Vivado IP 配置）仍受各自原有许可约束，见 [`THIRD_PARTY.md`](THIRD_PARTY.md)
+- **第三方组件**（正点原子以太网 / OV5640 RTL 例程、Ultralytics YOLO11n 权重、Vivado IP 配置）仍受各自原有许可约束，见 [`third_party.md`](third_party.md)
 - **版权共同所有**：`Zosili`、`XLK723`、`ousheeper`（三人团队）。再分发时须保留上述三人的版权声明。
 
 > 仓库当前为私有；转为公开后 MIT 才对第三方生效。

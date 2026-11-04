@@ -6,9 +6,9 @@
 |---|---|---|---|
 | 以太网 + OV5640 图传 RTL 例程（17 个 `.v`） | `fpga/src/rtl/arp/`、`udp/`、`ov5640/`、`gmii_to_rgmii/`、`eth_ctrl.v`、`eth_top.v`、`img_data_pkt.v`、`start_transfer_ctrl.v`、`ov5640_udp_pc.v` | 正点原子（ALIENTEK）；文件头标注 `Copyright(C) 正点原子 2023-2033` | 随开发板资料提供，本项目在其基础上接入自有顶层与决策模块；**未修改其版权头** |
 | 检测模型权重 `best.onnx` | `host/model/best.onnx` | 由 **Ultralytics YOLO11n** 训练得到，受 **AGPL-3.0** 约束 | 模型为 YOLO11n 的微调产物；对外分发模型或其衍生作品时须遵守 AGPL-3.0。本项目仅用于竞赛演示与自测 |
-| Vivado IP 配置 | `fpga/src/ip/clk_wiz_0.xci`、`fpga/src/ip/async_fifo_2048x8b.xci` | AMD / Xilinx 工具许可 | 仅含 IP 配置文件（参数），不含 IP 网表或加密源 |
+| Vivado IP 配置 | `fpga/src/ip/clk_wiz_0/clk_wiz_0.xci`、`fpga/src/ip/async_fifo_2048x8b/async_fifo_2048x8b.xci` | AMD / Xilinx 工具许可 | 仅含 IP 配置文件（参数），不含 IP 网表或加密源 |
 | Python 依赖 | `host/deploy/requirements.txt`、`skill/requirements.txt` | 各自上游许可（`onnxruntime-directml`、`opencv-python`、`numpy`、`pyserial`、`pynq`） | 未在本仓库内置其源码，仅列依赖 |
-| 开发板资料与手册 | `docs/refs/`（如 COIN-D6 手册抽取、引脚表） | 各原始厂商 | 仅作技术参考引用，不构成再分发授权 |
+| 开发板资料与手册 | `fpga/src/xdc/`（J4 针脚图）、`training/reports/`（COIN-D6 手册要点整理） | 各原始厂商 / 项目自撰 | 厂商资料仅作技术参考引用，不构成再分发授权 |
 
 ## 本项目自研部分（按 MIT 授权）
 

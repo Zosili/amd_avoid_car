@@ -431,3 +431,14 @@ README 顶部加了整车图；`docs/hardware_setup.md` 新增 §2.3「实物参
 - skill：5 工具 × 4 要素 = 20/20
 - 断链：全仓 md 相对链接 **0 条断链**
 
+
+## 2026-11-04 16:25 —— 许可证文件命名与路径修正
+
+队友合并了 LICENSE（MIT）+ 第三方说明后，按 3.2.5 复核发现三处问题，均已修：
+
+- `THIRD_PARTY.md` → **`third_party.md`**：指南要求文件名纯小写，`LICENSE` 属标准名可保留大写
+- 两个 IP 路径写错：`fpga/src/ip/clk_wiz_0.xci` → `fpga/src/ip/clk_wiz_0/clk_wiz_0.xci`（异步 FIFO 同理）
+- 引用了不存在的 `docs/refs/`：改为实有的 `fpga/src/xdc/`（J4 针脚图）与 `training/reports/`
+
+README 的许可证小节链接、目录树（补 `LICENSE` / `third_party.md`）同步更新。
+复核：命名 0 违规、断链 0、结构 16/16、指标表 51 行 0 缺证据。
