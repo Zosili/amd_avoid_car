@@ -261,5 +261,6 @@ sudo systemctl start radar.service   # 立即启动
 
 - **本项目自研部分**（决策 RTL、上位机程序、雷达桥、训练与指标脚本、文档）：**MIT**，见 [`LICENSE`](LICENSE)
 - **第三方组件**（正点原子以太网 / OV5640 RTL 例程、Ultralytics YOLO11n 权重、Vivado IP 配置）仍受各自原有许可约束，见 [`THIRD_PARTY.md`](THIRD_PARTY.md)
+- **版权共同所有**：`Zosili`、`XLK723`、`ousheeper`（三人团队）。再分发时须保留上述三人的版权声明。
 
 > 仓库当前为私有；转为公开后 MIT 才对第三方生效。
