@@ -256,3 +256,10 @@ sudo systemctl start radar.service   # 立即启动
 | 有没有可复用的判定工具 | `skill/README.md`（用法）+ `skill/overview.md`（为什么） |
 | 模型是怎么训出来的 | `training/README.md`（管线）+ `training/reports/`（结论） |
 | 版本变更 | `CHANGELOG.md` |
+
+## 许可证
+
+- **本项目自研部分**（决策 RTL、上位机程序、雷达桥、训练与指标脚本、文档）：**MIT**，见 [`LICENSE`](LICENSE)
+- **第三方组件**（正点原子以太网 / OV5640 RTL 例程、Ultralytics YOLO11n 权重、Vivado IP 配置）仍受各自原有许可约束，见 [`THIRD_PARTY.md`](THIRD_PARTY.md)
+
+> 仓库当前为私有；转为公开后 MIT 才对第三方生效。
