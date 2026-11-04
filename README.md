@@ -8,6 +8,11 @@ Zynq-7020（PL 决策）+ Windows PC（YOLO 感知）+ COIN-D6 雷达（板载 P
 
 当前状态：**相机视觉停车 + 雷达避障转向都已实测通过**，雷达已上板并配置开机自启。
 
+![实物](docs/assets/car_overview.jpg)
+
+> 实车照片见 `docs/assets/`（整车、板卡俯视、网口与供电、J4 接线四个角度）；
+> 板卡细节与接线说明见 [`docs/hardware_setup.md`](docs/hardware_setup.md)。
+
 ---
 
 ## 架构总览
@@ -87,7 +92,8 @@ car7020/
 │   ├── architecture.md        系统架构、时钟域、状态机、模块清单
 │   ├── interface.md           AI PC ↔ FPGA 接口定义（UDP 协议、引脚、AXI 邮箱）
 │   ├── hardware_setup.md      BOM、接线、供电、上电顺序、坑、排查顺序
-│   └── environment.md         运行环境（OS/驱动/依赖版本/板卡型号）
+│   ├── environment.md         运行环境（OS/驱动/依赖版本/板卡型号）
+│   └── assets/                实物照片（整车 / 板卡俯视 / 网口供电 / J4 接线）
 ├── fpga/
 │   ├── src/
 │   │   ├── rtl/               全部 Verilog（决策在 motor_decision.v）
@@ -95,7 +101,7 @@ car7020/
 │   │   ├── tcl/               重建工程 / 综合实现 / insert_ila
 │   │   ├── ip/                IP 的 xci
 │   │   └── sw/                PS 源码 + JTAG 脚本
-│   ├── build/                 位流 / hwh / xsa / BOOT.BIN + 构建脚本
+│   ├── build/                 位流 / hwh / xsa / elf + 构建脚本
 │   ├── pynq/                  ★ PYNQ 交付（雷达上板用）
 │   ├── report/
 │   │   ├── timing.md          资源占用 + 时序收敛
@@ -131,7 +137,9 @@ car7020/
 │   ├── check_timing.py        Vivado 报告判据化，直接给 PASS/FAIL
 │   ├── selftest.py            一条命令跑完离线自检（CI 可用）
 │   └── requirements.txt       依赖清单
-└── report/design_report.md    竞赛设计报告
+└── report/
+    ├── design_report.docx     竞赛设计报告（提交终版）
+    └── design_report.md       报告源文（Markdown，便于 diff）
 ```
 
 ### 与推荐目录结构的对照
@@ -155,7 +163,7 @@ car7020/
 | `metrics/` | 同 | `metrics.csv` + `logs/` + `scripts/` + `evidence/` |
 | `skill/README.md` | 同 | 另有 `overview.md`（定位）与 `lessons.md`（经验），三份分工见 skill 目录 |
 | （无） | `training/` | 数据集构建与训练脚本。推荐结构未规定，但报告要写"模型怎么来的"，单列更清楚 |
-| `report/` | 同 | `design_report.md` |
+| `report/` | 同 | `design_report.docx`（终版）+ `design_report.md`（源文） |
 
 > 所有目录名与文件名均为**纯英文小写/下划线**，符合"仓库内不得出现中文、空格或特殊字符"的要求；
 > 中文只出现在文件正文内。
@@ -233,7 +241,7 @@ sudo systemctl start radar.service   # 立即启动
 
 | 想了解 | 看这里 |
 |---|---|
-| 为什么这么划分软硬件 | `report/design_report.md` 第 2 节 |
+| 为什么这么划分软硬件 | `report/design_report.docx` 第 2 节（源文 `.md` 同名） |
 | 系统架构与数据流 | `docs/architecture.md` |
 | AI PC ↔ FPGA 协议怎么定 | `docs/interface.md` |
 | BOM / 接线 / 供电 / 排障 | `docs/hardware_setup.md` |

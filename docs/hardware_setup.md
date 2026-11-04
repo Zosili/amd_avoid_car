@@ -65,6 +65,17 @@
 
 ---
 
+## 2.3 实物参考（拍照留档）
+
+| 图 | 看什么 |
+|---|---|
+| [`assets/car_overview.jpg`](assets/car_overview.jpg) | 整车形态：相机装在前支架、板卡在中间层、车轮与电池在下层 |
+| [`assets/board_top_view.jpg`](assets/board_top_view.jpg) | 板卡俯视：ZYNQ 核心板位置、SD 卡槽、JTAG、上下两排扩展口 |
+| [`assets/board_ethernet_power.jpg`](assets/board_ethernet_power.jpg) | 网口 + 电源接口插好后的样子（**注意只有一个网口在用**） |
+| [`assets/board_j4_wiring.jpg`](assets/board_j4_wiring.jpg) | J4 排针上的杜邦线走法（雷达 TX/RX/GND 与电机信号） |
+
+> 这几张是提交时的实拍，接线以本文 §2.2 的表为准；照片只用来快速对照"大概长什么样"。
+
 ## 3 上电顺序
 
 1. **插好 SD 卡**，拨码开关拨到 **SD 启动**；

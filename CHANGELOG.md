@@ -402,3 +402,32 @@ training/
 ### 结果
 
 仓库 202 个文件，结构 = 当前工作区，无重复实现、无死链。
+
+## 2026-11-04 13:45 —— 补实物素材与报告终版，删除 BOOT.BIN
+
+### 新增
+
+| 路径 | 说明 |
+|---|---|
+| `docs/assets/car_overview.jpg` | 整车实拍（相机支架 / 板卡 / 车轮） |
+| `docs/assets/board_top_view.jpg` | 板卡俯视（核心板、SD 槽、JTAG、扩展口） |
+| `docs/assets/board_ethernet_power.jpg` | 网口 + 电源接好后的状态 |
+| `docs/assets/board_j4_wiring.jpg` | J4 排针杜邦线走法 |
+| `report/design_report.docx` | 设计报告提交终版（`design_report.md` 保留作源文） |
+
+README 顶部加了整车图；`docs/hardware_setup.md` 新增 §2.3「实物参考」逐张说明看什么。
+
+### 删除
+
+- `fpga/build/BOOT.BIN`（4,216,164 B）：旧方案裸机启动镜像，当前架构走
+  SD 卡 + PYNQ overlay，全仓无脚本读取；且文件名含大写，违反指南 3.2.5。
+  `fpga/build/README.md` 已注明移除原因与"日后要用怎么重建"。
+
+### 合规核对
+
+- 命名：删除后全仓**无大写文件名**（README/MODEL/CHANGELOG 属标准名）
+- 结构：3.2.5.5 的 16 项推荐路径 **16/16** 齐
+- 指标表：7 列 / 51 行 / 证据文件 0 缺失 / 测量条件 0 空
+- skill：5 工具 × 4 要素 = 20/20
+- 断链：全仓 md 相对链接 **0 条断链**
+

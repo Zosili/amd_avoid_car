@@ -7,8 +7,12 @@
 | `top.bit` | 4,045,679 B | `cf922bec1ea1f8a09ebabf4e1b434d3d` | **当前验证版**位流（2026-11-03 21:10） |
 | `motor.hwh` | 181,861 B | — | 与 `top.bit` 配套的硬件描述，PYNQ `Overlay()` 加载 overlay 时必需 |
 | `7020.xsa` | 326,781 B | — | 硬件平台导出，用于重建 FSBL / Vitis 工程（当前架构不依赖） |
-| `BOOT.BIN` | 4,216,164 B | — | 旧方案产物：FSBL + 位流 + `motor_app.elf`，裸机 SD 启动用。**当前架构已不用** |
 | `motor_app.elf` | 352,728 B | — | 旧方案 PS 侧程序。当前 PS 跑 PYNQ Python，此文件仅为兼容保留 |
+
+
+> 旧方案的 `BOOT.BIN`（FSBL + 位流 + PS 程序的裸机启动镜像）**已从仓库移除**：
+> 当前架构走 SD 卡 + PYNQ overlay，不需要它；若日后修好 QSPI 固化，按 §4 重新生成
+> （`bootgen` 用法见本文后半）。移除原因是文件名含大写，违反指南 3.2.5 的命名规则。
 | `build.bat` / `build.sh` | — | — | 一键重建脚本（Windows / Linux-macOS），见 §3 |
 
 ## 2 怎么部署位流（当前方式：SD 卡 + PYNQ overlay）
